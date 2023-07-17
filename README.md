@@ -11,7 +11,7 @@ Rerun this command to check for and install  updates .
 pip install git+https://github.com/jakerhodes/RF-PHATE-Official
 ```
 
-The random forest implementation is based on either RandomForestClassifier or RandomForestRegressor from [scikit-learn](https://scikit-learn.org/stable/), depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forst model by including either the response variable, $y$, or by stating the $prediction\_type$ as either 'classification' or 'regression'. If neither $y$ or $prediction\_type$ is given, RF-PHATE will assume a categorical response.
+The random forest implementation is based on either RandomForestClassifier or RandomForestRegressor from [scikit-learn](https://scikit-learn.org/stable/), depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forst model by including either the response variable, $y$, or by stating the $prediction_type$ as either 'classification' or 'regression'. If neither $y$ or $prediction_type$ is given, RF-PHATE will assume a categorical response.
 
 Below is a quick demo how to use RF-PHATE:
 
