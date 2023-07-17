@@ -4,5 +4,4 @@ pandas==2.0.3
 phate==1.0.11
 scikit_learn==1.3.0
 scipy==1.11.1
-
 seaborn
