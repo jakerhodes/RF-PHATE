@@ -131,10 +131,7 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
             """
             super().fit(X, y, sample_weight)
             self.leaf_matrix = self.apply(X)
-            
-            #---------------------------------------------------------------------------------#
-            #                          New Inclusion for Test Set
-            #---------------------------------------------------------------------------------#
+
             
             if x_test is not None:
                 n_test = np.shape(x_test)[0]
@@ -165,47 +162,6 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
 
                 self.in_bag_leaves = self.in_bag_indices * self.leaf_matrix
                 self.oob_leaves = self.oob_indices * self.leaf_matrix
-            
-            
-            
-            #---------------------------------------------------------------------------------#
-            #                              Original w/o Test Set
-            #---------------------------------------------------------------------------------#
-            # if self.prox_method == 'oob':
-            #     self.oob_indices = self.get_oob_indices(X)
-            #     self.oob_leaves = self.oob_indices * self.leaf_matrix
-
-            # if self.prox_method == 'rfgap':
-
-            #     self.oob_indices = self.get_oob_indices(X)
-            #     self.in_bag_counts = self.get_in_bag_counts(X)
-            #     self.in_bag_indices = 1 - self.oob_indices
-
-            #     self.in_bag_leaves = self.in_bag_indices * self.leaf_matrix
-            #     self.oob_leaves = self.oob_indices * self.leaf_matrix
-            #---------------------------------------------------------------------------------#
-                
-        # def fit_test(self, X, y, X_test, sample_weight =None):
-            
-        #     super().fit(X, y, sample_weight)
-            
-        #     self.leaf_matrix = self.apply(X_test)
-            
-        #     # Only run these two when needed
-        #     if self.prox_method == 'oob':
-        #         # self.oob_indices = self.get_oob_indices(X_test) # This might not work here; all OOB, define as such
-        #         self.oob_indices = np.ones(np.shape(X_test)[0], self.n_estimators)
-        #         self.oob_leaves = self.oob_indices * self.leaf_matrix
-
-        #     if self.prox_method == 'rfgap':
-
-        #         # self.oob_indices = self.get_oob_indices(X_test) # This might not work here; all OOB, define as such
-        #         self.oob_indices = np.ones(np.shape(X_test)[0], self.n_estimators)
-        #         self.in_bag_counts = self.get_in_bag_counts(X_test) # This might not work here
-        #         self.in_bag_indices = 1 - self.oob_indices
-
-        #         self.in_bag_leaves = self.in_bag_indices * self.leaf_matrix
-        #         self.oob_leaves = self.oob_indices * self.leaf_matrix
             
 
         
@@ -353,7 +309,7 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
                 if self.triangular:
 
                     tree_inds = self.leaf_matrix[ind, :] # Only indices after selected index
-                    prox_vec = np.sum(tree_inds == self.leaf_matrix[ind:, :], axis = 1) # same here
+                    prox_vec = np.sum(tree_inds == self.leaf_matrix[ind:, :], axis = 1)
 
                     cols = np.where(prox_vec != 0)[0] + ind
                     rows = np.ones(len(cols), dtype = int) * ind
@@ -370,7 +326,6 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
 
 
             elif self.prox_method == 'rfgap':
-                # TODO: make arguement for non-zero diagonals (default non-zero)
 
                 oob_trees    = np.nonzero(self.oob_indices[ind, :])[0]
                 in_bag_trees = np.nonzero(self.in_bag_indices[ind, :])[0]
@@ -457,7 +412,6 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
                 return prox_sparse
 
 
-        # TODO: Update prox_extend to work with x_test
         def prox_extend(self, data):
             """Method to compute proximities between the original training 
             observations and a set of new observations.
