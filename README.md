@@ -32,7 +32,11 @@ sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(d
 
 ```
 <<<<<<< HEAD
+<<<<<<< HEAD
 ![](figures/titanic.png)
 =======
 ![](figures/titanic.pdf)
 >>>>>>> 435141ed172f9c875ca7e3bb8fb856fd6b9f8556
+=======
+![](figures/titanic.png)
+>>>>>>> 6dc0bacb50d0fd9f72b0f884509b377a3ef7104d
