@@ -11,7 +11,7 @@ Rerun this command to check for and install  updates.
 pip install git+https://github.com/jakerhodes/RF-PHATE
 ```
 
-The random forest implementation is based on either RandomForestClassifier or RandomForestRegressor from [scikit-learn](https://scikit-learn.org/stable/), depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forest model by including either the response variable, $y$, or by stating the *prediction_type* as either 'classification' or 'regression'. If neither $y$ nor *prediction_type* is given, RF-PHATE will assume a categorical response.
+The random forest implementation is based on either [RandomForestClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html) or [RandomForestRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html) from [scikit-learn](https://scikit-learn.org/stable/), depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forest model by including either the response variable, $y$, or by stating the *prediction_type* as either 'classification' or 'regression'. If neither $y$ nor *prediction_type* is given, RF-PHATE will assume a categorical response. Any training options available for [RandomForestClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html) or [RandomForestRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html) will work for the RF-PHATE initialization.
 
 Below is a quick demo of how to use RF-PHATE on the Titanic dataset:
 
