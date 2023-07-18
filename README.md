@@ -13,7 +13,7 @@ pip install git+https://github.com/jakerhodes/RF-PHATE-Official
 
 The random forest implementation is based on either RandomForestClassifier or RandomForestRegressor from [scikit-learn](https://scikit-learn.org/stable/), depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forest model by including either the response variable, $y$, or by stating the *prediction_type* as either 'classification' or 'regression'. If neither $y$ nor *prediction_type* is given, RF-PHATE will assume a categorical response.
 
-Below is a quick demo of how to use RF-PHATE:
+Below is a quick demo of how to use RF-PHATE on the Titanic dataset:
 
 ```python
 from rfphate import RFPHATE
@@ -32,3 +32,22 @@ sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(d
 
 ```
 ![](figures/titanic.png)
+
+
+We can visually explore the relationships between the response (survival) and other feature variables:
+
+By passenger class:
+```python
+sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(data.iloc[:, 1]))
+plt.legend(title = 'By Class')
+```
+
+![](figures/titanic_class.png)
+
+By passenger sex:
+```python
+sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(data.iloc[:, 2]))
+plt.legend(title = 'By Sex')
+```
+
+![](figures/titanic_sex.png)
