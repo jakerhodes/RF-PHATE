@@ -31,4 +31,4 @@ embedding = rfphate.fit_transform(x, y)
 sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(data.iloc[:, 0]))
 
 ```
-![images/titanic.pdf]
+![](titanic.pdf)
