@@ -33,7 +33,6 @@ sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(d
 ```
 ![](figures/titanic.png)
 
-
 We can visually explore the relationships between the response (survival) and other feature variables:
 
 By passenger class:
@@ -41,13 +40,16 @@ By passenger class:
 sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(data.iloc[:, 1]))
 plt.legend(title = 'By Class')
 ```
-
 ![](figures/titanic_class.png)
+
 
 By passenger sex:
 ```python
 sns.scatterplot(x = embedding[:, 0], y = embedding[:, 1], hue = pd.Categorical(data.iloc[:, 2]))
 plt.legend(title = 'By Sex')
 ```
-
 ![](figures/titanic_sex.png)
+
+If you find the RF-PHATE method useful, please cite:
+
+J. S. Rhodes, A. Cutler, G. Wolf and K. R. Moon, "Random Forest-Based Diffusion Information Geometry for Supervised Visualization and Data Exploration," 2021 IEEE Statistical Signal Processing Workshop (SSP), Rio de Janeiro, Brazil, 2021, pp. 331-335, doi: 10.1109/SSP49050.2021.9513749.
