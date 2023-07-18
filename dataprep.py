@@ -7,6 +7,9 @@ def dataprep(data, label_col_idx = 0, transform = 'normalize'):
     This method normalizes (default) or standardizes all non-categorical variables in an array.
     All categorical variables are kept.
     
+    If tranform = "normalize", categorical varibles are scaled from 0 to 1. The highest value
+    is assigned the value of 1, the lowest value a will be assigned to 0.
+    
     """
 
     data = data.copy()
