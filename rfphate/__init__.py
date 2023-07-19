@@ -1,3 +1,3 @@
-from . import rfphate
-from . import rfgap
-from . import dataprep
+from .rfphate import RFPHATE
+import rfphate.rfgap
+import rfphate.dataprep
