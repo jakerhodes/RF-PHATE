@@ -1,5 +1,5 @@
 # TODO: Import rfgap from RF-GAP repo. Make this a requirement.
-from rfgap import RFGAP
+from rfphate.rfgap import RFGAP
 
 # For PHATE part
 from phate import PHATE
