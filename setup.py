@@ -8,7 +8,7 @@ def parse_requirements(filename):
     
     
 setup(
-    name = 'RF-PHATE',
+    name = 'RFPHATE',
     version = '0.1.0',
     description = 'The package is used to generate RF-PHATE manifold embeddings based on RF-GAP or other RF proximities',
     author = 'Jake Rhodes',
