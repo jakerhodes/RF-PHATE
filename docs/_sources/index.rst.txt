@@ -10,6 +10,9 @@ Welcome to RF-PHATE's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. Added readme per https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/
+
+   readme
    modules
 
 
