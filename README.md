@@ -4,6 +4,9 @@ RF-PHATE is an algorithm that allows the user to create random forest-based supe
 manifold learning algorithm described in 
 [Random Forest-Based Diffusion Information Geometry for Supervised Visualization and Data Exploration](https://ieeexplore.ieee.org/document/9513749).
 
+## Documentation
+For documentation, please visit [ReadTheDocs: RF-PHATE](https://jakerhodes.github.io/RF-PHATE/)
+
 ## Installation and updating
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install RF-PHATE.
 Rerun this command to check for and install  updates.
