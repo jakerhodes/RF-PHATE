@@ -1,4 +1,3 @@
-# TODO: Import rfgap from RF-GAP repo. Make this a requirement.
 from rfphate.rfgap import RFGAP
 
 # For PHATE part
@@ -136,12 +135,18 @@ def RFPHATE(prediction_type = None,
         Only used if prox_method == 'rfgap'.  Replaces the zero-diagonal entries
         of the rfgap proximities with ones (default is True)
 
+    beta : float
+        The damping factor for the PageRank algorithm. The range is (0, 1). Values
+        closer to 0 add more to the uniform teleporting probability. If 1, teleporting
+        is not used.
+
     self_similarity: bool  
         Only used if prox_method == 'rfgap'. All points are passed down as if OOB. 
         Increases similarity between an observation and itself as well as other
         points of the same class. NOTE: This partially disrupts the geometry
         learned by the RF-GAP proximities, but can be useful for exploring
-        particularly noisy data.
+        particularly noisy data. If True, self.prox_extend is employed to the training data
+        rather than self.get_proximities.
     """
 
     if prediction_type is None and y is None:

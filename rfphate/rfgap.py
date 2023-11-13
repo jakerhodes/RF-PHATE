@@ -23,10 +23,9 @@ else:
 from sklearn.utils.validation import check_is_fitted
 
 
-def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type = 'sparse', triangular = True,
-          non_zero_diagonal = True, **kwargs):
+def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type = 'sparse', triangular = True, non_zero_diagonal = True, **kwargs):
     """
-    A factory method to conditionally create the RFGAP class based on RandomForestClassifier or RandomForestRegressor
+    A factory method to conditionally create the RFGAP class based on RandomForestClassifier or RandomForestRegressor (depdning on the type of response, y)
 
     This class takes on a random forest predictors (sklearn) and adds methods to 
     construct proximities from the random forest object. 
@@ -348,7 +347,6 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
                 if self.non_zero_diagonal:
                     S_in  = np.count_nonzero(self.in_bag_indices[ind, :])
                     
-                    # TODO: Check behavior here
                     if S_in > 0:
                         prox_vec[ind] = np.sum(np.divide(match_counts[ind, in_bag_trees], ks_in)) / S_in
                     else: 
