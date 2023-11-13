@@ -16,6 +16,6 @@ setup(
     author_email = 'jakerhodes8@gmail.com',
     packages = find_packages(),
     install_requires = parse_requirements('requirements.txt'),
-    package_data = {'rfphate': 'datasets/*'},
+    package_data = {'rfphate': ['datasets/*']},
     long_description = long_description
 )
