@@ -28,9 +28,9 @@ def load_data(name = 'data'):
     elif name == 'auto-mpg':
         path = 'data/auto-mpg.csv'
     else:
-        raise NameError("{} is not recognized. The only names are 'data' and 'data_raw'.".format(name))
+        raise NameError("{} is not recognized. The only names are 'iris', 'titanic', and 'auto-mpg'.".format(name))
     
 
-    data_path = pkg_resources.resource_filename('mypackage', path)
+    data_path = pkg_resources.resource_filename('rfphate', path)
     
     return pd.read_csv(data_path)
