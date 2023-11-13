@@ -1,4 +1,4 @@
 from .rfphate import RFPHATE
 import rfphate.rfgap
 import rfphate.dataprep
-import rfphate.load_data
+from rhpdate.load_data import load_data
