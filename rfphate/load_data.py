@@ -2,7 +2,7 @@ import pkg_resources
 import pandas as pd
 
 
-def load_data(name = 'data'):
+def load_data(name = 'iris'):
     """
     Function to load data from the rfphate package.
     Data is read in as a pandas DataFrame. In each example,
