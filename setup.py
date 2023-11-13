@@ -1,11 +1,12 @@
 from setuptools import setup, find_packages
 
-
 def parse_requirements(filename):
     with open(filename, 'r') as file:
         lines = file.readlines()
         return [line.strip() for line in lines]
     
+with open('README.md', 'r', encoding='utf-8') as f:
+    long_description = f.read()
     
 setup(
     name = 'rfphate',
@@ -14,5 +15,7 @@ setup(
     author = 'Jake Rhodes',
     author_email = 'jakerhodes8@gmail.com',
     packages = find_packages(),
-    install_requires = parse_requirements('requirements.txt')
+    install_requires = parse_requirements('requirements.txt'),
+    package_data = {'rfphate': 'datasets/*'},
+    long_description = long_description
 )
