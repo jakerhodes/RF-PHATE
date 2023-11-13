@@ -10,7 +10,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
     
 setup(
     name = 'rfphate',
-    version = '0.1.0',
+    version = '0.1.1',
     description = 'The package is used to generate RF-PHATE manifold embeddings based on RF-GAP or other RF proximities',
     author = 'Jake Rhodes',
     author_email = 'jakerhodes8@gmail.com',
