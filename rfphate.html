@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rfphate package &mdash; RF-PHATE 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            RF-PHATE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">rfphate package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#rfphate-dataprep-module">rfphate.dataprep module</a><ul>
+<li><a class="reference internal" href="#rfphate.dataprep.dataprep"><code class="docutils literal notranslate"><span class="pre">dataprep()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rfphate-rfgap-module">rfphate.rfgap module</a><ul>
+<li><a class="reference internal" href="#rfphate.rfgap.RFGAP"><code class="docutils literal notranslate"><span class="pre">RFGAP()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rfphate-rfphate-module">rfphate.rfphate module</a><ul>
+<li><a class="reference internal" href="#rfphate.rfphate.PHATET"><code class="docutils literal notranslate"><span class="pre">PHATET</span></code></a><ul>
+<li><a class="reference internal" href="#rfphate.rfphate.PHATET.diff_op"><code class="docutils literal notranslate"><span class="pre">PHATET.diff_op</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rfphate.rfphate.RFPHATE"><code class="docutils literal notranslate"><span class="pre">RFPHATE()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RF-PHATE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">rfphate package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/rfphate.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rfphate-package">
+<h1>rfphate package<a class="headerlink" href="#rfphate-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="rfphate-dataprep-module">
+<h2>rfphate.dataprep module<a class="headerlink" href="#rfphate-dataprep-module" title="Link to this heading"></a></h2>
+<dl class="py function" id="module-rfphate.dataprep">
+<dt class="sig sig-object py" id="rfphate.dataprep.dataprep">
+<span class="sig-prename descclassname"><span class="pre">rfphate.dataprep.</span></span><span class="sig-name descname"><span class="pre">dataprep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normalize'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/dataprep.html#dataprep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.dataprep.dataprep" title="Link to this definition"></a></dt>
+<dd><p>Reads in a pandas dataframe and returns a normalized or standardized numpy array along with corresponding labels (if provided in the dataframe). The column label must be identified via the ‘label_col_idx’ argument.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">pd.DataFrame</span></dt><dd><p>The input DataFrame containing the data to be preprocessed.</p>
+</dd>
+<dt>label_col_idx<span class="classifier">int, optional, default: 0</span></dt><dd><p>The index of the column to be used as the label. If None, only the features will be returned.</p>
+</dd>
+<dt>transform<span class="classifier">{‘normalize’, ‘standardize’}, optional, default: ‘normalize’</span></dt><dd><p>The type of transformation to apply. ‘normalize’ scales categorical variables from 0 to 1,
+assigning the highest value the value of 1 and the lowest value the value of 0.
+‘standardize’ standardizes numerical variables by subtracting the mean and dividing by the standard deviation.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>np.ndarray or tuple</dt><dd><p>If label_col_idx is None, returns a NumPy array containing the preprocessed features.
+If label_col_idx is specified, returns a tuple containing a NumPy array of features and the corresponding labels (as a pandas series).</p>
+</dd>
+</dl>
+</section>
+<section id="examples">
+<h3>Examples:<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Creating a sample DataFrame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;feature1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;feature2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Preprocessing the data with default parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">dataprep</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Preprocessing the data with standardization</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_standardized</span><span class="p">,</span> <span class="n">y_standardized</span> <span class="o">=</span> <span class="n">dataprep</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s1">&#39;standardize&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+</section>
+<section id="rfphate-rfgap-module">
+<h2>rfphate.rfgap module<a class="headerlink" href="#rfphate-rfgap-module" title="Link to this heading"></a></h2>
+<dl class="py function" id="module-rfphate.rfgap">
+<dt class="sig sig-object py" id="rfphate.rfgap.RFGAP">
+<span class="sig-prename descclassname"><span class="pre">rfphate.rfgap.</span></span><span class="sig-name descname"><span class="pre">RFGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prox_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rfgap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sparse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangular</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_zero_diagonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/rfgap.html#RFGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.rfgap.RFGAP" title="Link to this definition"></a></dt>
+<dd><p>A factory method to conditionally create the RFGAP class based on RandomForestClassifier or RandomForestRegressor (depdning on the type of response, y)</p>
+<p>This class takes on a random forest predictors (sklearn) and adds methods to 
+construct proximities from the random forest object.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>prediction_type<span class="classifier">str</span></dt><dd><p>Options are ‘regression’ or ‘classification’</p>
+</dd>
+<dt>y<span class="classifier">array-like of shape (n_samples,) or (n_samples, n_outputs)</span></dt><dd><p>The target values (class labels in classification, real numbers in regression).
+This is an optional way to determine whether RandomForestClassifier or RandomForestRegressor
+should be used</p>
+</dd>
+<dt>prox_method<span class="classifier">str</span></dt><dd><p>The type of proximity to be constructed.  Options are ‘original’, ‘oob’, 
+or ‘rfgap’ (default is ‘oob’)</p>
+</dd>
+<dt>matrix_type<span class="classifier">str</span></dt><dd><p>Whether the matrix returned proximities whould be sparse or dense 
+(default is sparse)</p>
+</dd>
+<dt>triangular<span class="classifier">bool</span></dt><dd><p>Should only the upper triangle of the proximity matrix be computed? This speeds up computation
+time. Not available for RF-GAP proximities (default is True)</p>
+</dd>
+<dt>non_zero_diagonal<span class="classifier">bool</span></dt><dd><p>Only used for RF-GAP proximities. Should the diagonal entries be computed as non-zero? 
+If True, the proximities are also normalized to be between 0 (min) and 1 (max).
+(default is True)</p>
+</dd>
+<dt><a href="#id2"><span class="problematic" id="id3">**</span></a>kwargs</dt><dd><p>Keyward arguements specific to the RandomForestClassifer or 
+RandomForestRegressor classes</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">object</span></dt><dd><p>The RF object (unfitted)</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="rfphate-rfphate-module">
+<h2>rfphate.rfphate module<a class="headerlink" href="#rfphate-rfphate-module" title="Link to this heading"></a></h2>
+<dl class="py class" id="module-rfphate.rfphate">
+<dt class="sig sig-object py" id="rfphate.rfphate.PHATET">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rfphate.rfphate.</span></span><span class="sig-name descname"><span class="pre">PHATET</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/rfphate.html#PHATET"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.rfphate.PHATET" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PHATE</span></code></p>
+<p>PHATET is an adaptation of PHATE which incorporates random jumps into the diffusion operator.
+This improvement is based on Google’s PageRank algorithm and makes the PHATE algorithm more
+robust to parameter selection.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="rfphate.rfphate.PHATET.diff_op">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">diff_op</span></span><a class="headerlink" href="#rfphate.rfphate.PHATET.diff_op" title="Link to this definition"></a></dt>
+<dd><p>diff_op :  array-like, shape=[n_samples, n_samples] or [n_landmark, n_landmark]
+The diffusion operator built from the graph</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rfphate.rfphate.RFPHATE">
+<span class="sig-prename descclassname"><span class="pre">rfphate.rfphate.</span></span><span class="sig-name descname"><span class="pre">RFPHATE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prox_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rfgap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sparse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_landmark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pca</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mds_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sgd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mds_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'metric'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_zero_diagonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/rfphate.html#RFPHATE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.rfphate.RFPHATE" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>An RF-PHATE class which is used to fit a random forest, generate RF-proximities,</dt><dd><p>and create RF-PHATE embeddings.</p>
+</dd>
+</dl>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_components<span class="classifier">int</span></dt><dd><p>The number of dimensions for the RF-PHATE embedding</p>
+</dd>
+<dt>prox_method<span class="classifier">str</span></dt><dd><p>The type of proximity to be constructed.  Options are ‘original’, ‘oob’, and
+‘rfgap’ (default is ‘oob’)</p>
+</dd>
+<dt>matrix_type<span class="classifier">str</span></dt><dd><p>Whether the proximity type should be ‘sparse’ or ‘dense’ (default is sparse)</p>
+</dd>
+<dt>n_landmark<span class="classifier">int, optional</span></dt><dd><p>number of landmarks to use in fast PHATE (default is 2000)</p>
+</dd>
+<dt>t<span class="classifier">int, optional</span></dt><dd><p>power to which the diffusion operator is powered.
+This sets the level of diffusion. If ‘auto’, t is selected
+according to the knee point in the Von Neumann Entropy of
+the diffusion operator (default is ‘auto’)</p>
+</dd>
+<dt>n_pca<span class="classifier">int, optional</span></dt><dd><p>Number of principal components to use for calculating
+neighborhoods. For extremely large datasets, using
+n_pca &lt; 20 allows neighborhoods to be calculated in
+roughly log(n_samples) time (default is 100)</p>
+</dd>
+<dt>mds<span class="classifier">string, optional</span></dt><dd><p>choose from [‘classic’, ‘metric’, ‘nonmetric’].
+Selects which MDS algorithm is used for dimensionality reduction
+(default is ‘metric’)</p>
+</dd>
+<dt>mds_solver<span class="classifier">{‘sgd’, ‘smacof’}</span></dt><dd><p>which solver to use for metric MDS. SGD is substantially faster,
+but produces slightly less optimal results (default is ‘sgd’)</p>
+</dd>
+<dt>mds_dist<span class="classifier">string, optional</span></dt><dd><p>Distance metric for MDS. Recommended values: ‘euclidean’ and ‘cosine’
+Any metric from <cite>scipy.spatial.distance</cite> can be used. Custom distance
+functions of form <cite>f(x, y) = d</cite> are also accepted (default is ‘euclidean’)</p>
+</dd>
+<dt>n_jobs<span class="classifier">integer, optional</span></dt><dd><p>The number of jobs to use for the computation.
+If -1 all CPUs are used. If 1 is given, no parallel computing code is
+used at all, which is useful for debugging.
+For n_jobs below -1, (n_cpus + 1 + n_jobs) are used. Thus for
+n_jobs = -2, all CPUs but one are used (default is 1)</p>
+</dd>
+<dt>random_state<span class="classifier">integer</span></dt><dd><p>random seed state set for RF and MDS</p>
+</dd>
+<dt>verbose<span class="classifier">int or bool</span></dt><dd><p>If <cite>True</cite> or <cite>&gt; 0</cite>, print status messages (default is 0)</p>
+</dd>
+<dt>non_zero_diagonal: bool</dt><dd><p>Only used if prox_method == ‘rfgap’.  Replaces the zero-diagonal entries
+of the rfgap proximities with ones (default is True)</p>
+</dd>
+<dt>beta<span class="classifier">float</span></dt><dd><p>The damping factor for the PageRank algorithm. The range is (0, 1). Values
+closer to 0 add more to the uniform teleporting probability. If 1, teleporting
+is not used.</p>
+</dd>
+<dt>self_similarity: bool  </dt><dd><p>Only used if prox_method == ‘rfgap’. All points are passed down as if OOB. 
+Increases similarity between an observation and itself as well as other
+points of the same class. NOTE: This partially disrupts the geometry
+learned by the RF-GAP proximities, but can be useful for exploring
+particularly noisy data. If True, self.prox_extend is employed to the training data
+rather than self.get_proximities.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<span class="target" id="module-rfphate"></span></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jake S. Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

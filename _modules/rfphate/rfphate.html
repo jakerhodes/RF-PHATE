@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rfphate.rfphate &mdash; RF-PHATE 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            RF-PHATE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RF-PHATE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rfphate.rfphate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rfphate.rfphate</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">rfphate.rfgap</span> <span class="kn">import</span> <span class="n">RFGAP</span>
+
+<span class="c1"># For PHATE part</span>
+<span class="kn">from</span> <span class="nn">phate</span> <span class="kn">import</span> <span class="n">PHATE</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+<span class="kn">import</span> <span class="nn">graphtools</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">NotFittedError</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">check_is_fitted</span>
+
+<div class="viewcode-block" id="PHATET">
+<a class="viewcode-back" href="../../rfphate.html#rfphate.rfphate.PHATET">[docs]</a>
+<span class="k">class</span> <span class="nc">PHATET</span><span class="p">(</span><span class="n">PHATE</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PHATET is an adaptation of PHATE which incorporates random jumps into the diffusion operator.</span>
+<span class="sd">    This improvement is based on Google&#39;s PageRank algorithm and makes the PHATE algorithm more</span>
+<span class="sd">    robust to parameter selection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PHATET</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">diff_op</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;diff_op :  array-like, shape=[n_samples, n_samples] or [n_landmark, n_landmark]</span>
+<span class="sd">        The diffusion operator built from the graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">graphtools</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">LandmarkGraph</span><span class="p">):</span>
+                <span class="n">diff_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">landmark_op</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">diff_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">diff_op</span>
+            <span class="k">if</span> <span class="n">sparse</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">diff_op</span><span class="p">):</span>
+                <span class="n">diff_op</span> <span class="o">=</span> <span class="n">diff_op</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">diff_op</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">diff_op_tele</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="n">diff_op</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">dim</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">))</span>
+
+
+            <span class="k">return</span> <span class="n">diff_op_tele</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span>
+                <span class="s2">&quot;This PHATE instance is not fitted yet. Call &quot;</span>
+                <span class="s2">&quot;&#39;fit&#39; with appropriate arguments before &quot;</span>
+                <span class="s2">&quot;using this method.&quot;</span>
+            <span class="p">)</span></div>
+
+            
+
+<div class="viewcode-block" id="RFPHATE">
+<a class="viewcode-back" href="../../rfphate.html#rfphate.rfphate.RFPHATE">[docs]</a>
+<span class="k">def</span> <span class="nf">RFPHATE</span><span class="p">(</span><span class="n">prediction_type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           
+            <span class="n">n_components</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">prox_method</span> <span class="o">=</span> <span class="s1">&#39;rfgap&#39;</span><span class="p">,</span>
+            <span class="n">matrix_type</span> <span class="o">=</span> <span class="s1">&#39;sparse&#39;</span><span class="p">,</span>
+            <span class="n">n_landmark</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+            <span class="n">n_pca</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="n">mds_solver</span> <span class="o">=</span> <span class="s2">&quot;sgd&quot;</span><span class="p">,</span>
+            <span class="n">mds_dist</span> <span class="o">=</span> <span class="s2">&quot;euclidean&quot;</span><span class="p">,</span>
+            <span class="n">mds</span> <span class="o">=</span> <span class="s2">&quot;metric&quot;</span><span class="p">,</span>
+            <span class="n">n_jobs</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">random_state</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">non_zero_diagonal</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
+            <span class="n">self_similarity</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An RF-PHATE class which is used to fit a random forest, generate RF-proximities,</span>
+<span class="sd">       and create RF-PHATE embeddings.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_components : int</span>
+<span class="sd">        The number of dimensions for the RF-PHATE embedding</span>
+
+<span class="sd">    prox_method : str</span>
+<span class="sd">        The type of proximity to be constructed.  Options are &#39;original&#39;, &#39;oob&#39;, and</span>
+<span class="sd">        &#39;rfgap&#39; (default is &#39;oob&#39;)</span>
+
+<span class="sd">    matrix_type : str</span>
+<span class="sd">        Whether the proximity type should be &#39;sparse&#39; or &#39;dense&#39; (default is sparse)</span>
+<span class="sd">    </span>
+<span class="sd">    n_landmark : int, optional</span>
+<span class="sd">        number of landmarks to use in fast PHATE (default is 2000)</span>
+
+<span class="sd">    t : int, optional</span>
+<span class="sd">        power to which the diffusion operator is powered.</span>
+<span class="sd">        This sets the level of diffusion. If &#39;auto&#39;, t is selected</span>
+<span class="sd">        according to the knee point in the Von Neumann Entropy of</span>
+<span class="sd">        the diffusion operator (default is &#39;auto&#39;)</span>
+
+<span class="sd">    n_pca : int, optional</span>
+<span class="sd">        Number of principal components to use for calculating</span>
+<span class="sd">        neighborhoods. For extremely large datasets, using</span>
+<span class="sd">        n_pca &lt; 20 allows neighborhoods to be calculated in</span>
+<span class="sd">        roughly log(n_samples) time (default is 100)</span>
+
+<span class="sd">    mds : string, optional</span>
+<span class="sd">        choose from [&#39;classic&#39;, &#39;metric&#39;, &#39;nonmetric&#39;].</span>
+<span class="sd">        Selects which MDS algorithm is used for dimensionality reduction</span>
+<span class="sd">        (default is &#39;metric&#39;)</span>
+
+<span class="sd">    mds_solver : {&#39;sgd&#39;, &#39;smacof&#39;}</span>
+<span class="sd">        which solver to use for metric MDS. SGD is substantially faster,</span>
+<span class="sd">        but produces slightly less optimal results (default is &#39;sgd&#39;)</span>
+
+<span class="sd">    mds_dist : string, optional</span>
+<span class="sd">        Distance metric for MDS. Recommended values: &#39;euclidean&#39; and &#39;cosine&#39;</span>
+<span class="sd">        Any metric from `scipy.spatial.distance` can be used. Custom distance</span>
+<span class="sd">        functions of form `f(x, y) = d` are also accepted (default is &#39;euclidean&#39;)</span>
+
+<span class="sd">    n_jobs : integer, optional</span>
+<span class="sd">        The number of jobs to use for the computation.</span>
+<span class="sd">        If -1 all CPUs are used. If 1 is given, no parallel computing code is</span>
+<span class="sd">        used at all, which is useful for debugging.</span>
+<span class="sd">        For n_jobs below -1, (n_cpus + 1 + n_jobs) are used. Thus for</span>
+<span class="sd">        n_jobs = -2, all CPUs but one are used (default is 1)</span>
+
+<span class="sd">    random_state : integer</span>
+<span class="sd">        random seed state set for RF and MDS</span>
+
+
+<span class="sd">    verbose : int or bool</span>
+<span class="sd">        If `True` or `&gt; 0`, print status messages (default is 0)</span>
+
+<span class="sd">    non_zero_diagonal: bool</span>
+<span class="sd">        Only used if prox_method == &#39;rfgap&#39;.  Replaces the zero-diagonal entries</span>
+<span class="sd">        of the rfgap proximities with ones (default is True)</span>
+
+<span class="sd">    beta : float</span>
+<span class="sd">        The damping factor for the PageRank algorithm. The range is (0, 1). Values</span>
+<span class="sd">        closer to 0 add more to the uniform teleporting probability. If 1, teleporting</span>
+<span class="sd">        is not used.</span>
+
+<span class="sd">    self_similarity: bool  </span>
+<span class="sd">        Only used if prox_method == &#39;rfgap&#39;. All points are passed down as if OOB. </span>
+<span class="sd">        Increases similarity between an observation and itself as well as other</span>
+<span class="sd">        points of the same class. NOTE: This partially disrupts the geometry</span>
+<span class="sd">        learned by the RF-GAP proximities, but can be useful for exploring</span>
+<span class="sd">        particularly noisy data. If True, self.prox_extend is employed to the training data</span>
+<span class="sd">        rather than self.get_proximities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">prediction_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">prediction_type</span> <span class="o">=</span> <span class="s1">&#39;classification&#39;</span>
+        
+    <span class="c1"># In the rfgap module, rf is defined without arguements</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">RFGAP</span><span class="p">(</span><span class="n">prediction_type</span> <span class="o">=</span> <span class="n">prediction_type</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">RFPHATE</span><span class="p">(</span><span class="n">rf</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">PHATET</span><span class="p">):</span>
+    <span class="c1"># class RFPHATE(PHATET):</span>
+    
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span><span class="p">,</span>
+            <span class="n">prox_method</span>  <span class="o">=</span> <span class="n">prox_method</span><span class="p">,</span>
+            <span class="n">matrix_type</span>  <span class="o">=</span> <span class="n">matrix_type</span><span class="p">,</span>
+            <span class="n">n_landmark</span>   <span class="o">=</span> <span class="n">n_landmark</span><span class="p">,</span>
+            <span class="n">t</span>            <span class="o">=</span> <span class="n">t</span><span class="p">,</span>
+            <span class="n">n_pca</span>        <span class="o">=</span> <span class="n">n_pca</span><span class="p">,</span>
+            <span class="n">mds_solver</span>   <span class="o">=</span> <span class="n">mds_solver</span><span class="p">,</span>
+            <span class="n">mds_dist</span>     <span class="o">=</span> <span class="n">mds_dist</span> <span class="p">,</span>
+            <span class="n">mds</span>          <span class="o">=</span> <span class="n">mds</span><span class="p">,</span>
+            <span class="n">n_jobs</span>       <span class="o">=</span> <span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span><span class="p">,</span>
+            <span class="n">verbose</span>      <span class="o">=</span> <span class="n">verbose</span><span class="p">,</span>
+            <span class="n">non_zero_diagonal</span> <span class="o">=</span> <span class="n">non_zero_diagonal</span><span class="p">,</span>
+            <span class="n">beta</span>         <span class="o">=</span> <span class="n">beta</span><span class="p">,</span>
+            <span class="n">self_similarity</span> <span class="o">=</span> <span class="n">self_similarity</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+            <span class="nb">super</span><span class="p">(</span><span class="n">RFPHATE</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_landmark</span> <span class="o">=</span> <span class="n">n_landmark</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mds</span> <span class="o">=</span> <span class="n">mds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_pca</span> <span class="o">=</span> <span class="n">n_pca</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">knn_dist</span> <span class="o">=</span> <span class="s1">&#39;precomputed_affinity&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mds_dist</span> <span class="o">=</span> <span class="n">mds_dist</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mds_solver</span> <span class="o">=</span> <span class="n">mds_solver</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_diff_potential</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimal_t</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prox_method</span> <span class="o">=</span> <span class="n">prox_method</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_type</span> <span class="o">=</span> <span class="n">matrix_type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">non_zero_diagonal</span> <span class="o">=</span> <span class="n">non_zero_diagonal</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">self_similarity</span> <span class="o">=</span> <span class="n">self_similarity</span>
+
+        <span class="c1"># From https://www.geeksforgeeks.org/class-factories-a-powerful-pattern-in-python/</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                    
+                
+        <span class="k">def</span> <span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            
+            <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            
+            <span class="n">phate_op</span> <span class="o">=</span> <span class="n">PHATET</span><span class="p">(</span><span class="n">n_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span>
+                <span class="n">n_landmark</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_landmark</span><span class="p">,</span>
+                <span class="n">mds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mds</span><span class="p">,</span>
+                <span class="n">n_pca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pca</span><span class="p">,</span>
+                <span class="n">knn_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">knn_dist</span><span class="p">,</span>
+                <span class="n">mds_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mds_dist</span><span class="p">,</span>
+                <span class="n">mds_solver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mds_solver</span><span class="p">,</span>
+                <span class="n">random_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                <span class="n">verbose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> 
+                <span class="n">beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">phate_op</span> <span class="o">=</span> <span class="n">phate_op</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">embedding_</span> <span class="o">=</span> <span class="n">phate_op</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proximity</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_</span>
+            
+            
+        <span class="k">def</span> <span class="nf">_fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_test</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sample_weight</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Internal method for fitting and transforming the data</span>
+<span class="sd">            </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">                The training input samples. Internally, its dtype will be converted to dtype=np.float32.</span>
+<span class="sd">                If a sparse matrix is provided, it will be converted into a sparse csc_matrix.</span>
+
+<span class="sd">            y : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
+<span class="sd">                The target values (class labels in classification, real numbers in regression).</span>
+<span class="sd">                </span>
+<span class="sd">            x_test : {array-like, sparse matrix} of shape (n__test_samples, n_features)</span>
+<span class="sd">                An optional test set. The training set buildes the RF-PHATE model, but the </span>
+<span class="sd">                embedding can be extended to this test set.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">n</span><span class="p">,</span>  <span class="n">_</span><span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_test</span> <span class="o">=</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">sample_weight</span> <span class="o">=</span> <span class="n">sample_weight</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prox_method</span> <span class="o">==</span> <span class="s1">&#39;rfgap&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_similarity</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x_test</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">proximity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prox_extend</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">proximity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prox_extend</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">x_test</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">proximity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_proximities</span><span class="p">()</span>
+                            
+            <span class="n">phate_op</span> <span class="o">=</span> <span class="n">PHATET</span><span class="p">(</span><span class="n">n_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span>
+                <span class="n">n_landmark</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_landmark</span><span class="p">,</span>
+                <span class="n">mds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mds</span><span class="p">,</span>
+                <span class="n">n_pca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pca</span><span class="p">,</span>
+                <span class="n">knn_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">knn_dist</span><span class="p">,</span>
+                <span class="n">mds_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mds_dist</span><span class="p">,</span>
+                <span class="n">mds_solver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mds_solver</span><span class="p">,</span>
+                <span class="n">random_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                <span class="n">verbose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> 
+                <span class="n">beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">phate_op</span> <span class="o">=</span> <span class="n">phate_op</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">embedding_</span> <span class="o">=</span> <span class="n">phate_op</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">proximity</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_test</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sample_weight</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Applies _fit_tranform to the data, x, y, and returns the RF-PHATE embedding</span>
+
+<span class="sd">            x : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">                The training input samples. Internally, its dtype will be converted to dtype=np.float32.</span>
+<span class="sd">                If a sparse matrix is provided, it will be converted into a sparse csc_matrix.</span>
+
+<span class="sd">            y : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
+<span class="sd">                The target values (class labels in classification, real numbers in regression).</span>
+<span class="sd">                </span>
+<span class="sd">            x_test : {array-like, sparse matrix} of shape (n__test_samples, n_features)</span>
+<span class="sd">                An optional test set. The training set buildes the RF-PHATE model, but the </span>
+<span class="sd">                embedding can be extended to this test set.</span>
+
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            array-like (n_features, n_components)</span>
+<span class="sd">                A lower-dimensional representation of the data following the RF-PHATE algorithm</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">sample_weight</span> <span class="o">=</span> <span class="n">sample_weight</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_</span>
+
+    <span class="k">return</span> <span class="n">RFPHATE</span><span class="p">(</span>    
+                <span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span><span class="p">,</span>
+                <span class="n">prox_method</span> <span class="o">=</span> <span class="n">prox_method</span><span class="p">,</span>
+                <span class="n">matrix_type</span> <span class="o">=</span> <span class="n">matrix_type</span><span class="p">,</span>
+                <span class="n">n_landmark</span> <span class="o">=</span> <span class="n">n_landmark</span><span class="p">,</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">,</span>
+                <span class="n">n_pca</span> <span class="o">=</span> <span class="n">n_pca</span><span class="p">,</span>
+                <span class="n">mds_solver</span> <span class="o">=</span> <span class="n">mds_solver</span><span class="p">,</span>
+                <span class="n">mds_dist</span> <span class="o">=</span> <span class="n">mds_dist</span><span class="p">,</span>
+                <span class="n">mds</span> <span class="o">=</span> <span class="n">mds</span><span class="p">,</span>
+                <span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span><span class="p">,</span>
+                <span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span><span class="p">,</span>
+                <span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span><span class="p">,</span>
+                <span class="n">non_zero_diagonal</span> <span class="o">=</span> <span class="n">non_zero_diagonal</span><span class="p">,</span>
+                <span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span><span class="p">,</span>
+                <span class="n">self_similarity</span> <span class="o">=</span> <span class="n">self_similarity</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jake S. Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
