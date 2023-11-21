@@ -5,4 +5,3 @@ RF-PHATE
    :maxdepth: 4
 
    rfphate
-   setup

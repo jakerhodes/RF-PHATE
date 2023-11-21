@@ -18,7 +18,8 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="RF-PHATE" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,31 +41,32 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">rfphate package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#rfphate-dataprep-module">rfphate.dataprep module</a><ul>
-<li><a class="reference internal" href="#rfphate.dataprep.dataprep"><code class="docutils literal notranslate"><span class="pre">dataprep()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme_link.html">README - RF-PHATE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">RF-PHATE</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">rfphate package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rfphate-dataprep-module">rfphate.dataprep module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rfphate.dataprep.dataprep"><code class="docutils literal notranslate"><span class="pre">dataprep()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rfphate-rfgap-module">rfphate.rfgap module</a><ul>
-<li><a class="reference internal" href="#rfphate.rfgap.RFGAP"><code class="docutils literal notranslate"><span class="pre">RFGAP()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rfphate-rfgap-module">rfphate.rfgap module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rfphate.rfgap.RFGAP"><code class="docutils literal notranslate"><span class="pre">RFGAP()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rfphate-rfphate-module">rfphate.rfphate module</a><ul>
-<li><a class="reference internal" href="#rfphate.rfphate.PHATET"><code class="docutils literal notranslate"><span class="pre">PHATET</span></code></a><ul>
-<li><a class="reference internal" href="#rfphate.rfphate.PHATET.diff_op"><code class="docutils literal notranslate"><span class="pre">PHATET.diff_op</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rfphate-rfphate-module">rfphate.rfphate module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rfphate.rfphate.PHATET"><code class="docutils literal notranslate"><span class="pre">PHATET</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rfphate.rfphate.RFPHATE"><code class="docutils literal notranslate"><span class="pre">RFPHATE()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rfphate.rfphate.RFPHATE"><code class="docutils literal notranslate"><span class="pre">RFPHATE()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
-</div>
+</li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -79,6 +81,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">RF-PHATE</a></li>
       <li class="breadcrumb-item active">rfphate package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/rfphate.rst.txt" rel="nofollow"> View page source</a>
@@ -158,14 +161,14 @@ construct proximities from the random forest object.</p>
 <section id="id1">
 <h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <dl class="simple">
-<dt>prediction_type<span class="classifier">str</span></dt><dd><p>Options are ‘regression’ or ‘classification’</p>
+<dt>prediction_type<span class="classifier">str</span></dt><dd><p>Options are <cite>regression</cite> or <cite>classification</cite></p>
 </dd>
 <dt>y<span class="classifier">array-like of shape (n_samples,) or (n_samples, n_outputs)</span></dt><dd><p>The target values (class labels in classification, real numbers in regression).
 This is an optional way to determine whether RandomForestClassifier or RandomForestRegressor
 should be used</p>
 </dd>
-<dt>prox_method<span class="classifier">str</span></dt><dd><p>The type of proximity to be constructed.  Options are ‘original’, ‘oob’, 
-or ‘rfgap’ (default is ‘oob’)</p>
+<dt>prox_method<span class="classifier">str</span></dt><dd><p>The type of proximity to be constructed.  Options are <cite>original</cite>, <cite>oob</cite>, 
+or <cite>rfgap</cite> (default is <cite>oob</cite>)</p>
 </dd>
 <dt>matrix_type<span class="classifier">str</span></dt><dd><p>Whether the matrix returned proximities whould be sparse or dense 
 (default is sparse)</p>
@@ -287,7 +290,9 @@ rather than self.get_proximities.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="RF-PHATE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
