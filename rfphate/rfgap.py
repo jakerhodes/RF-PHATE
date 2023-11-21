@@ -266,7 +266,7 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
             ----------
             leaf_matrix : (n_samples, n_estimators) array_like
             oob_indices : (n_samples, n_estimators) array_like
-            method      : string: methods may be 'original', 'oob', or 'rfgap (default is 'oob')
+            method      : string: methods may be `original`, `oob`, or `rfgap` (default is `oob`)
             
             Returns
             -------
@@ -373,10 +373,10 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
             Returns
             -------
             array-like
-                (if self.matrix_type == 'dense') matrix of pair-wise proximities
+                (if self.matrix_type == `dense`) matrix of pair-wise proximities
 
             csr_matrix
-                (if self.matrix_type == 'sparse') a sparse crs_matrix of pair-wise proximities
+                (if self.matrix_type == `sparse`) a sparse crs_matrix of pair-wise proximities
             
             """
             check_is_fitted(self)
@@ -424,11 +424,11 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
             Returns
             -------
             array-like
-                (if self.matrix_type == 'dense') matrix of pair-wise proximities between
+                (if self.matrix_type == `dense`) matrix of pair-wise proximities between
                 the training data and the new observations
 
             csr_matrix
-                (if self.matrix_type == 'sparse') a sparse crs_matrix of pair-wise proximities
+                (if self.matrix_type == `sparse`) a sparse crs_matrix of pair-wise proximities
                 between the training data and the new observations
             """
             check_is_fitted(self)
