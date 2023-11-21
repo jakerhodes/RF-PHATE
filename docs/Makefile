@@ -23,3 +23,9 @@ help:
 github:
 	@make html
 	@cp -a _build/html/. ../docs
+
+
+# https://olgarithms.github.io/sphinx-tutorial/docs/7-hosting-on-github-pages.html
+clean:
+	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O);
+	cd _build; git worktree add -f html gh-pages
