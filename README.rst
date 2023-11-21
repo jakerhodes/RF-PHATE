@@ -1,7 +1,7 @@
 RF-PHATE
 ========
 
-RF-PHATE is an algorithm that allows the user to create random forest-based supervised, low-dimensional embeddings based on the manifold learning algorithm described in "Random Forest-Based Diffusion Information Geometry for Supervised Visualization and Data Exploration" [1]_.
+RF-PHATE is an algorithm that allows the user to create random forest-based supervised, low-dimensional embeddings based on the manifold learning algorithm described in "Random Forest-Based Diffusion Information Geometry for Supervised Visualization and Data Exploration" [1].
 
 Documentation
 -------------
@@ -17,7 +17,7 @@ Use the package manager `pip` to install RF-PHATE. Rerun this command to check f
 
     pip install git+https://github.com/jakerhodes/RF-PHATE
 
-The random forest implementation is based on either `RandomForestClassifier` [2]_ or `RandomForestRegressor` [3]_ from `scikit-learn` [4]_, depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forest model by including either the response variable, `y`, or by stating the `prediction_type` as either 'classification' or 'regression'. If neither `y` nor `prediction_type` is given, RF-PHATE will assume a categorical response. Any training options available for `RandomForestClassifier` [2]_ or `RandomForestRegressor` [3]_ will work for the RF-PHATE initialization.
+The random forest implementation is based on either `RandomForestClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_ or `RandomForestRegressor <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html>`_ from `scikit-learn <https://scikit-learn.org/stable/>`_, depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forest model by including either the response variable, `y`, or by stating the `prediction_type` as either 'classification' or 'regression'. If neither `y` nor `prediction_type` is given, RF-PHATE will assume a categorical response. Any training options available for `RandomForestClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_ or `RandomForestRegressor <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html>`_ will work for the RF-PHATE initialization.
 
 Quick Demo
 ----------
@@ -64,4 +64,4 @@ By passenger sex:
 
 If you find the RF-PHATE method useful, please cite:
 
-J. S. Rhodes, A. Cutler, G. Wolf, and K. R. Moon, "Random Forest-Based Diffusion Information Geometry for Supervised Visualization and Data Exploration," 2021 IEEE Statistical Signal Processing Workshop (SSP), Rio de Janeiro, Brazil, 2021, pp. 331-335, doi: 10.1109/SSP49050.2021.9513749.
+.. [1] J. S. Rhodes, A. Cutler, G. Wolf, and K. R. Moon, "Random Forest-Based Diffusion Information Geometry for Supervised Visualization and Data Exploration," 2021 IEEE Statistical Signal Processing Workshop (SSP), Rio de Janeiro, Brazil, 2021, pp. 331-335, doi: 10.1109/SSP49050.2021.9513749.
