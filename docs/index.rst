@@ -10,7 +10,7 @@ Welcome to RF-PHATE's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   .. include:: ../README.rst
+   readme_link
    modules
 
 
