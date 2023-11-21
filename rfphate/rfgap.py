@@ -38,7 +38,7 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
     ----------
 
     prediction_type : str
-        Options are 'regression' or 'classification'
+        Options are `regression` or `classification`
 
     y : array-like of shape (n_samples,) or (n_samples, n_outputs)
         The target values (class labels in classification, real numbers in regression).
@@ -46,8 +46,8 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
         should be used
 
     prox_method : str
-        The type of proximity to be constructed.  Options are 'original', 'oob', 
-        or 'rfgap' (default is 'oob')
+        The type of proximity to be constructed.  Options are `original`, `oob`, 
+        or `rfgap` (default is `oob`)
 
     matrix_type : str
         Whether the matrix returned proximities whould be sparse or dense 
