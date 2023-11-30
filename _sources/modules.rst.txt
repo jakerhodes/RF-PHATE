@@ -5,3 +5,4 @@ RF-PHATE
    :maxdepth: 4
 
    rfphate
+   rfphate.metrics
