@@ -7,7 +7,7 @@ Welcome to RF-PHATE's documentation!
 ====================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    readme_link
