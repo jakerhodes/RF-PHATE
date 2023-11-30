@@ -1,5 +1,5 @@
-rfphate.metrics package
-=======================
+Metrics
+=======
 
 Submodules
 ----------
