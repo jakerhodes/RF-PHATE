@@ -69,7 +69,7 @@ def RFPHATE(prediction_type = None,
             verbose = 0,
             non_zero_diagonal = True,
             beta = 0.9,
-            self_similarity = True,
+            self_similarity = False,
             **kwargs):
     
     
@@ -109,7 +109,7 @@ def RFPHATE(prediction_type = None,
         (default is 'metric')
 
     mds_solver : {'sgd', 'smacof'}
-        which solver to use for metric MDS. SGD is substantially faster,
+        which solver to use for metric MDS. SGD is substantially faster
         but produces slightly less optimal results (default is 'sgd')
 
     mds_dist : string, optional
@@ -152,7 +152,7 @@ def RFPHATE(prediction_type = None,
     if prediction_type is None and y is None:
         prediction_type = 'classification'
         
-    # In the rfgap module, rf is defined without arguements
+    # In the rfgap module, rf is defined without arguments
     rf = RFGAP(prediction_type = prediction_type, y = y, **kwargs)
 
     class RFPHATE(rf.__class__, PHATET):
