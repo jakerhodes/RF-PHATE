@@ -1,5 +1,5 @@
-rfphate package
-===============
+RF-PHATE
+========
 
 Submodules
 ----------
