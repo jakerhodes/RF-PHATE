@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rfphate.metrics package &mdash; RF-PHATE 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            RF-PHATE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme_link.html">README - RF-PHATE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">RF-PHATE</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RF-PHATE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">rfphate.metrics package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/rfphate.metrics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rfphate-metrics-package">
+<h1>rfphate.metrics package<a class="headerlink" href="#rfphate-metrics-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-rfphate.metrics.GSP">
+<span id="rfphate-metrics-gsp-module"></span><h2>rfphate.metrics.GSP module<a class="headerlink" href="#module-rfphate.metrics.GSP" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rfphate.metrics.GSP.global_structure_preservation">
+<span class="sig-prename descclassname"><span class="pre">rfphate.metrics.GSP.</span></span><span class="sig-name descname"><span class="pre">global_structure_preservation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_repeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spearman'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'classification'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/metrics/GSP.html#global_structure_preservation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.metrics.GSP.global_structure_preservation" title="Link to this definition"></a></dt>
+<dd><p>Global structure preservation provides a quantitative metric to assess the level at which a low-dimensional embedding retains global variable information relative to the supervised problem.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>x<span class="classifier">array-like of shape (n_samples, n_features)</span></dt><dd><p>Input data.</p>
+</dd>
+<dt>y<span class="classifier">array-like of shape (n_samples,)</span></dt><dd><p>Target values (labels).</p>
+</dd>
+<dt>embedding<span class="classifier">array-like of shape (n_samples, n_components)</span></dt><dd><p>Low-dimensional embedding.</p>
+</dd>
+<dt>model<span class="classifier">object, optional</span></dt><dd><p>The estimator to use for predictions for permutation importance. If None,
+KNeighborsClassifier or KNeighborsRegressor is used based on prediction_type.</p>
+</dd>
+<dt>n_repeats<span class="classifier">int, optional</span></dt><dd><p>Number of times to permute the data.</p>
+</dd>
+<dt>n_neighbors<span class="classifier">int, optional</span></dt><dd><p>Number of neighbors to use for kNN.</p>
+</dd>
+<dt>n_jobs<span class="classifier">int, optional</span></dt><dd><p>The number of jobs to run in parallel.</p>
+</dd>
+<dt>type<span class="classifier">{‘spearman’, ‘pearson’}, optional</span></dt><dd><p>Type of correlation to compute.</p>
+</dd>
+<dt>prediction_type<span class="classifier">{‘classification’, ‘regression’}, optional</span></dt><dd><p>Type of prediction task. If None, it is inferred based on the target values.</p>
+</dd>
+<dt>random_state<span class="classifier">int or None, optional</span></dt><dd><p>Seed for reproducibility.</p>
+</dd>
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs</dt><dd><p>Additional parameters passed to the kNN model.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple</dt><dd><p>Mean and standard deviation of the correlations between kNN importances and univariate correlations.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rfphate.metrics.GSP.univariate_correlations">
+<span class="sig-prename descclassname"><span class="pre">rfphate.metrics.GSP.</span></span><span class="sig-name descname"><span class="pre">univariate_correlations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/metrics/GSP.html#univariate_correlations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.metrics.GSP.univariate_correlations" title="Link to this definition"></a></dt>
+<dd><p>Calculate univariate correlations between each feature in x and the embedding.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>x<span class="classifier">array-like of shape (n_samples, n_features)</span></dt><dd><p>Input data.</p>
+</dd>
+<dt>embedding<span class="classifier">array-like of shape (n_samples, n_components)</span></dt><dd><p>Low-dimensional embedding.</p>
+</dd>
+<dt>type<span class="classifier">{‘spearman’, ‘pearson’}</span></dt><dd><p>Type of correlation to compute.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray</dt><dd><p>Univariate correlations for each variable in x.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rfphate.metrics.GSP.univariate_distance">
+<span class="sig-prename descclassname"><span class="pre">rfphate.metrics.GSP.</span></span><span class="sig-name descname"><span class="pre">univariate_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/metrics/GSP.html#univariate_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.metrics.GSP.univariate_distance" title="Link to this definition"></a></dt>
+<dd><p>Calculate pairwise distances between points in a vector.</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>x<span class="classifier">array-like</span></dt><dd><p>Input vector.</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray</dt><dd><p>Pairwise distances.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-rfphate.metrics.LGS">
+<span id="rfphate-metrics-lgs-module"></span><h2>rfphate.metrics.LGS module<a class="headerlink" href="#module-rfphate.metrics.LGS" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rfphate.metrics.LGS.low_dimensional_group_separation">
+<span class="sig-prename descclassname"><span class="pre">rfphate.metrics.LGS.</span></span><span class="sig-name descname"><span class="pre">low_dimensional_group_separation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/metrics/LGS.html#low_dimensional_group_separation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.metrics.LGS.low_dimensional_group_separation" title="Link to this definition"></a></dt>
+<dd><p>Calculates the silhouette score, a metric for assessing the separation between groups in low-dimensional embeddings.</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>embedding<span class="classifier">array-like, shape (n_samples, n_features)</span></dt><dd><p>The low-dimensional embedding of the data.</p>
+</dd>
+<dt>y<span class="classifier">array-like, shape (n_samples,)</span></dt><dd><p>True labels for each sample in the dataset.</p>
+</dd>
+<dt><a href="#id8"><span class="problematic" id="id9">**</span></a>kwargs<span class="classifier">additional keyword arguments</span></dt><dd><p>Additional parameters to be passed to the <cite>sklearn.metrics.silhouette_score</cite> function.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>score<span class="classifier">float</span></dt><dd><p>The silhouette score, ranging from -1 to 1, where a higher score indicates better separation between clusters or groups.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-rfphate.metrics.LSP">
+<span id="rfphate-metrics-lsp-module"></span><h2>rfphate.metrics.LSP module<a class="headerlink" href="#module-rfphate.metrics.LSP" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rfphate.metrics.LSP.local_structure_preservation">
+<span class="sig-prename descclassname"><span class="pre">rfphate.metrics.LSP.</span></span><span class="sig-name descname"><span class="pre">local_structure_preservation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_repeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spearman'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'classification'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rfphate/metrics/LSP.html#local_structure_preservation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rfphate.metrics.LSP.local_structure_preservation" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the correlation between the feature importances in the data’s classification /
+regression problem and the feature importance in determining the embedding.</p>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>x<span class="classifier">numpy array, default: None</span></dt><dd><p>An (n, d) data matrix.</p>
+</dd>
+<dt>y<span class="classifier">numpy array, default: None</span></dt><dd><p>A (n, 1) array of data labels.</p>
+</dd>
+<dt>embedding<span class="classifier">numpy array or dictionary</span></dt><dd><p>If numpy array: an (n, p) embedding of the data.
+If dictionary: keys are identifiers for different embeddings, and values are corresponding embedding arrays.</p>
+</dd>
+<dt>model<span class="classifier">an sklearn model, default: KNeighborsClassifier or KNeighbors Regressor</span></dt><dd><p>Model to fit to the dataset.</p>
+</dd>
+<dt>emb_model<span class="classifier">an sklearn model, default: KNeighborsRegressor</span></dt><dd><p>Model to fit to the embedding.</p>
+</dd>
+<dt>prediction_type<span class="classifier">string, default: ‘classification’</span></dt><dd><p>Needed to determine classification or regression type.
+Options are ‘classification’ or ‘regression’.</p>
+</dd>
+<dt>type: string, default: ‘pearson’</dt><dd><p>Designation of whether Spearman or Pearson correlation should be used.
+Please choose ‘spearman’ or ‘pearson’.</p>
+</dd>
+<dt>n_repeats<span class="classifier">int, default: 30</span></dt><dd><p>The number of repetitions used in the permutation importance.</p>
+</dd>
+<dt>random_state<span class="classifier">int, optional, default: None</span></dt><dd><p>Random seed for generator used in generating permutation importance.</p>
+</dd>
+<dt>keep_scores<span class="classifier">bool, optional, default: False</span></dt><dd><p>If true, the model and embedding model validation scores will be saved in addition to the correlations.
+Returned values are in a dictionary. Requires x_val and y_val.</p>
+</dd>
+<dt>n_jobs<span class="classifier">int, optional, default: 1</span></dt><dd><p>The number of jobs to use for the computation.
+If -1, all CPUs are used. If 1 is given, no parallel computing code is
+used at all, which is useful for debugging.
+For n_jobs below -1, (n_cpus + 1 + n_jobs) are used. Thus for
+n_jobs = -2, all CPUs but one are used.</p>
+</dd>
+<dt>x_val<span class="classifier">numpy array, optional, default: None</span></dt><dd><p>Validation data for the model.</p>
+</dd>
+<dt>y_val<span class="classifier">numpy array, optional, default: None</span></dt><dd><p>Validation labels for the model.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Returns<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>correlation<span class="classifier">numeric or dictionary</span></dt><dd><p>If embedding is a numpy array, returns the mean Spearman or Pearson correlation between
+the embedding feature importance and the prediction feature importance along with the standard deviation.
+If embedding is a dictionary, returns a dictionary where keys are identifiers for different embeddings,
+and values are tuples containing mean and standard deviation of the correlation for each embedding.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-rfphate.metrics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-rfphate.metrics" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jake S. Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
