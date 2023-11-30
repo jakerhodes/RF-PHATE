@@ -14,57 +14,65 @@ def local_structure_preservation(x, y, embedding, model = None, emb_model = None
                            x_val = None, y_val = None,
                            **kwargs):
     """
-    This code produces the correlation between the feature importances in the data's classification / 
+    This function calculates the correlation between the feature importances in the data's classification /
     regression problem and the feature importance in determining the embedding.
-    
+
     Parameters
     ----------
     x : numpy array, default: None
-        an (n, d) data matrix.
-       
+        An (n, d) data matrix.
+
     y : numpy array, default: None
-        a (n, 1) array of data labels.
-     
-    emb : numpy array, default: None
-        an (n, p) embedding of the data
+        A (n, 1) array of data labels.
+
+    embedding : numpy array or dictionary
+        If numpy array: an (n, p) embedding of the data.
+        If dictionary: keys are identifiers for different embeddings, and values are corresponding embedding arrays.
 
     model : an sklearn model, default: KNeighborsClassifier or KNeighbors Regressor
-        to fit to the dataset
+        Model to fit to the dataset.
 
-    emb_model : an sklearn model, default: KNeighborsRegressor 
-        to fit to the embedding. 
-        
-    prediction_type : string, default:'classification'
-        only needed if proximity matrix is not included.  Needed to determine classification or regression forest type.
-        options are 'classification' or 'regression'
-        
+    emb_model : an sklearn model, default: KNeighborsRegressor
+        Model to fit to the embedding.
+
+    prediction_type : string, default: 'classification'
+        Needed to determine classification or regression type.
+        Options are 'classification' or 'regression'.
+
     type: string, default: 'pearson'
-        designation of whether Spearman or Pearson correlatoin should be used
-        Please choose 'spearman' or 'pearson'
-        
+        Designation of whether Spearman or Pearson correlation should be used.
+        Please choose 'spearman' or 'pearson'.
+
     n_repeats : int, default: 30
-        the number of repetitions used in the permutation importance
-        
+        The number of repetitions used in the permutation importance.
+
     random_state : int, optional, default: None
-        random seed for generator used in methods with random initialzations (['mds', 'tsne', 'phate', 'umap', 'kpca',
-        'nca', 'lle', 'phate', 'umap'])
+        Random seed for generator used in generating permutation importance.
 
     keep_scores : bool, optional, default: False
-        If true, the model and embedding model validation scores will be saved in addition the correlations
+        If true, the model and embedding model validation scores will be saved in addition to the correlations.
         Returned values are in a dictionary. Requires x_val and y_val.
 
     n_jobs : int, optional, default: 1
         The number of jobs to use for the computation.
-        If -1 all CPUs are used. If 1 is given, no parallel computing code is
+        If -1, all CPUs are used. If 1 is given, no parallel computing code is
         used at all, which is useful for debugging.
         For n_jobs below -1, (n_cpus + 1 + n_jobs) are used. Thus for
-        n_jobs = -2, all CPUs but one are used
-    
+        n_jobs = -2, all CPUs but one are used.
+
+    x_val : numpy array, optional, default: None
+        Validation data for the model.
+
+    y_val : numpy array, optional, default: None
+        Validation labels for the model.
+
     Returns
     -------
-    correlation : numeric
-        the mean Spearman or Pearson correlation between the embedding feature importance and the prediction feature importance
-        along with the standard deviation
+    correlation : numeric or dictionary
+        If embedding is a numpy array, returns the mean Spearman or Pearson correlation between
+        the embedding feature importance and the prediction feature importance along with the standard deviation.
+        If embedding is a dictionary, returns a dictionary where keys are identifiers for different embeddings,
+        and values are tuples containing mean and standard deviation of the correlation for each embedding.
     """
 
     if prediction_type is None and y is None:
