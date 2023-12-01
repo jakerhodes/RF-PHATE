@@ -11,7 +11,7 @@ For documentation, please visit `ReadTheDocs: RF-PHATE <https://jakerhodes.githu
 Installation and updating
 -------------------------
 
-Use the package manager `pip` to install RF-PHATE. Rerun this command to check for and install updates. Installation should take no more than 5 minutes.
+Use the package manager `pip` to install RF-PHATE. Rerun this command to check for and install updates. Installation should take no more than 5 minutes. The package requires `python>=3.7`.
 
 .. code-block:: bash
 
