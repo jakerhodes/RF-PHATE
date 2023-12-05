@@ -26,7 +26,7 @@ def load_data(name = 'iris'):
         path = 'datasets/titanic.csv'
 
     elif name == 'auto-mpg':
-        path = 'data/auto-mpg.csv'
+        path = 'datasets/auto-mpg.csv'
     else:
         raise NameError("{} is not recognized. The only names are 'iris', 'titanic', and 'auto-mpg'.".format(name))
     
