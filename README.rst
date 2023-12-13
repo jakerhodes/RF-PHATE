@@ -62,8 +62,15 @@ By passenger sex:
 
 .. image:: figures/titanic_sex.png
 
+For code to generate the quantification results from the paper, please see
+`RF-PHATE-Quantification, <https://github.com/jakerhodes/RF-PHATE-Quantification>`_
+
+Quantification Results
+----------------------
 If you find the RF-PHATE method useful, please cite:
 
+References
+----------
 .. [1] 
     Rhodes, J.S., Aumon, A., Morin, S., et al.: Gaining Biological Insights through Supervised
     Data Visualization. bioRxiv (2023). https://doi.org/10.1101/2023.11.22.568384.
