@@ -26,19 +26,21 @@ Below is a quick demo of how to use RF-PHATE on the Titanic dataset:
 
 .. code-block:: python
 
+    import matplotlib.pyplot as plt
     from rfphate import RFPHATE
-    from dataprep import dataprep
+    from rfphate.dataprep import dataprep
     import pandas as pd
     import seaborn as sns
 
-    data = pd.read_csv('datasets/titanic.csv')
-    x, y = dataprep(data)
+    # Load the dataset
+    data = pd.read_csv('rfphate/datasets/titanic.csv')
 
-    rfphate = RFPHATE(y=y, random_state=0)
-    # Alternatively, rfphate = RFPHATE(prediction_type='classification', random_state=0)
+    # Prepare the data
+    x, y = dataprep(data, encoding = 'integer')
 
-    embedding = rfphate.fit_transform(x, y)
-    sns.scatterplot(x=embedding[:, 0], y=embedding[:, 1], hue=pd.Categorical(data.iloc[:, 0]))
+    # Initialize and fit the RFPHATE model
+    rfphate = RFPHATE(y = y, random_state = 42)
+    emb = rfphate.fit_transform(x, y)
 
 .. image:: figures/titanic.png
 
@@ -48,8 +50,10 @@ By passenger class:
 
 .. code-block:: python
 
-    sns.scatterplot(x=embedding[:, 0], y=embedding[:, 1], hue=pd.Categorical(data.iloc[:, 1]))
-    plt.legend(title='By Class')
+    plot = sns.scatterplot(x = emb[:, 0], y = emb[:, 1], hue = pd.Categorical(data['Pclass']), markers = {'survived': '.', 'died': 'X'}, style = data['Survived'], alpha = .8, palette = 'Dark2')
+    plot.set_title('RF-PHATE Embedding Colored by Pclass')
+    plot.set_xlabel('RF-PHATE 1')
+    plot.set_ylabel('RF-PHATE 2')
 
 .. image:: figures/titanic_class.png
 
@@ -57,8 +61,10 @@ By passenger sex:
 
 .. code-block:: python
 
-    sns.scatterplot(x=embedding[:, 0], y=embedding[:, 1], hue=pd.Categorical(data.iloc[:, 2]))
-    plt.legend(title='By Sex')
+    plot = sns.scatterplot(x = emb[:, 0], y = emb[:, 1], hue = data['Sex'], markers = {'survived': '.', 'died': 'X'}, style = data['Survived'], alpha = .9, palette = 'Dark2')
+    plot.set_title('RF-PHATE Embedding Colored by Sex')
+    plot.set_xlabel('RF-PHATE 1')
+    plot.set_ylabel('RF-PHATE 2')
 
 .. image:: figures/titanic_sex.png
 
