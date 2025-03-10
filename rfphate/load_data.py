@@ -27,8 +27,11 @@ def load_data(name = 'iris'):
 
     elif name == 'auto-mpg':
         path = 'datasets/auto-mpg.csv'
+
+    elif name == 'artificial_tree':
+        path = 'datasets/artificial_tree.csv'
     else:
-        raise NameError("{} is not recognized. The only names are 'iris', 'titanic', and 'auto-mpg'.".format(name))
+        raise NameError("{} is not recognized. The only names are 'iris', 'titanic', 'auto-mpg', and 'artificial_tree'.".format(name))
     
 
     data_path = pkg_resources.resource_filename('rfphate', path)
