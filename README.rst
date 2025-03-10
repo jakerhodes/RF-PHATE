@@ -42,8 +42,6 @@ Below is a quick demo of how to use RF-PHATE on the Titanic dataset:
     rfphate = RFPHATE(y = y, random_state = 42)
     emb = rfphate.fit_transform(x, y)
 
-.. image:: figures/titanic.png
-
 We can visually explore the relationships between the response (survival) and other feature variables:
 
 By passenger class:
