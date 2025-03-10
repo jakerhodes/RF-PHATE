@@ -3,10 +3,10 @@ README - RF-PHATE
 
 RF-PHATE is an algorithm that allows the user to create random forest-based supervised, low-dimensional embeddings based on the manifold learning algorithm described in "Gaining Biological Insights through Supervised Data Visualization" [1]_.
 
-Documentation
--------------
+.. Documentation
+.. -------------
 
-For documentation, please visit `ReadTheDocs: RF-PHATE <https://jakerhodes.github.io/RF-PHATE/>`_.
+.. For documentation, please visit `ReadTheDocs: RF-PHATE <https://jakerhodes.github.io/RF-PHATE/>`_.
 
 Installation and updating
 -------------------------
