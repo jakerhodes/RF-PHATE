@@ -55,7 +55,7 @@ By passenger class:
     plot.set_xlabel('RF-PHATE 1')
     plot.set_ylabel('RF-PHATE 2')
 
-.. image:: figures/titanic_class.png
+.. image:: figures/titanic_pclass.png
 
 By passenger sex:
 
@@ -68,11 +68,6 @@ By passenger sex:
 
 .. image:: figures/titanic_sex.png
 
-For code to generate the quantification results from the paper, please see
-`RF-PHATE-Quantification, <https://github.com/jakerhodes/RF-PHATE-Quantification>`_
-
-Quantification Results
-----------------------
 If you find the RF-PHATE method useful, please cite:
 
 References
