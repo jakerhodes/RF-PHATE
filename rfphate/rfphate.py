@@ -5,23 +5,20 @@ from phate import PHATE
 import numpy as np
 from scipy import sparse
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import RandomForestRegressor
-
 import graphtools
 from sklearn.exceptions import NotFittedError
 
 from sklearn.utils.validation import check_is_fitted
 
-class PHATET(PHATE): 
+class PageRankPHATE(PHATE): 
     """
-    PHATET is an adaptation of PHATE which incorporates random jumps into the diffusion operator.
+    PageRankPHATE is an adaptation of PHATE which incorporates random jumps into the diffusion operator.
     This improvement is based on Google's PageRank algorithm and makes the PHATE algorithm more
     robust to parameter selection.
     """
 
     def __init__(self, beta = 0.9, **kwargs):
-        super(PHATET, self).__init__(**kwargs)
+        super(PageRankPHATE, self).__init__(**kwargs)
 
         self.beta = beta
 
@@ -155,8 +152,8 @@ def RFPHATE(prediction_type = None,
     # In the rfgap module, rf is defined without arguments
     rf = RFGAP(prediction_type = prediction_type, y = y, **kwargs)
 
-    class RFPHATE(rf.__class__, PHATET):
-    # class RFPHATE(PHATET):
+    class RFPHATE(rf.__class__, PageRankPHATE):
+    # class RFPHATE(PageRankPHATE):
     
         def __init__(
             self,
@@ -207,12 +204,21 @@ def RFPHATE(prediction_type = None,
             for k, v in kwargs.items():
                 setattr(self, k, v)
                     
-                
-        def _transform(self, x):
+        # TODO: Update behavior. Instead of adding x_test as an argument, just apply the tranform to x, extending to new points.
+        def transform(self, x, x_test = None):
             
             check_is_fitted(self)
+
+            if self.prox_method == 'rfgap' and self.self_similarity:
+                if x_test is None:
+                    self.proximity = self.prox_extend(x)
+                else:
+                    self.proximity = self.prox_extend(np.concatenate([x, x_test]))
+            else:
+                self.proximity = self.get_proximities()
+
             
-            phate_op = PHATET(n_components = self.n_components,
+            phate_op = PageRankPHATE(n_components = self.n_components,
                 t = self.t,
                 n_landmark = self.n_landmark,
                 mds = self.mds,
@@ -251,30 +257,34 @@ def RFPHATE(prediction_type = None,
             n,  _= x.shape
             
             self.fit(x, y, x_test = x_test, sample_weight = sample_weight)
+            self.is_fitted_ = True
 
-            if self.prox_method == 'rfgap' and self.self_similarity:
-                if x_test is None:
-                    proximity = self.prox_extend(x)
-                else:
-                    proximity = self.prox_extend(np.concatenate([x, x_test]))
-            else:
-                proximity = self.get_proximities()
+            self.embedding_ = self.transform(x, x_test = x_test)
+
+            # if self.prox_method == 'rfgap' and self.self_similarity:
+            #     if x_test is None:
+            #         proximity = self.prox_extend(x)
+            #     else:
+            #         proximity = self.prox_extend(np.concatenate([x, x_test]))
+            # else:
+            #     proximity = self.get_proximities()
                             
-            phate_op = PHATET(n_components = self.n_components,
-                t = self.t,
-                n_landmark = self.n_landmark,
-                mds = self.mds,
-                n_pca = self.n_pca,
-                knn_dist = self.knn_dist,
-                mds_dist = self.mds_dist,
-                mds_solver = self.mds_solver,
-                random_state = self.random_state,
-                verbose = self.verbose, 
-                beta = self.beta)
+            # TODO: Don't generate phate_op in both transform and fit_transform
+            # phate_op = PageRankPHATE(n_components = self.n_components,
+            #     t = self.t,
+            #     n_landmark = self.n_landmark,
+            #     mds = self.mds,
+            #     n_pca = self.n_pca,
+            #     knn_dist = self.knn_dist,
+            #     mds_dist = self.mds_dist,
+            #     mds_solver = self.mds_solver,
+            #     random_state = self.random_state,
+            #     verbose = self.verbose, 
+            #     beta = self.beta)
             
-            self.phate_op = phate_op
+            # self.phate_op = phate_op
 
-            self.embedding_ = phate_op.fit_transform(proximity)
+            # self.embedding_ = phate_op.fit_transform(proximity)
 
         def fit_transform(self, x, y, x_test = None, sample_weight = None):
 
