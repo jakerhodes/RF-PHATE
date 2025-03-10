@@ -1,69 +1,72 @@
 import pandas as pd
 import numpy as np
 
-def dataprep(data: pd.DataFrame, label_col_idx: int = 0, transform: str = 'normalize', encoding: str = 'integer'):
+def dataprep(data, label_col_idx = 0, transform = 'normalize'):
+    
     """
-    Preprocesses a pandas DataFrame by normalizing or standardizing numerical features.
-    Encodes categorical variables and extracts labels if specified.
+    Reads in a pandas dataframe and returns a normalized or standardized numpy array along with corresponding labels (if provided in the dataframe). The column label must be identified via the 'label_col_idx' argument.
 
     Parameters:
     -----------
     data : pd.DataFrame
         The input DataFrame containing the data to be preprocessed.
 
-    label_col_idx : int, optional (default=0)
-        The index of the column to be used as the label. If None, only features are returned.
+    label_col_idx : int, optional, default: 0
+        The index of the column to be used as the label. If None, only the features will be returned.
 
-    transform : {'normalize', 'standardize'}, optional (default='normalize')
-        The transformation to apply:
-        - 'normalize': Scales numerical variables to [0,1] range.
-        - 'standardize': Standardizes numerical variables (zero mean, unit variance).
-
-    encoding : {'integer', 'onehot'}, optional (default='integer')
-        The encoding to apply to categorical variables:
-        - 'integer': Encodes categorical variables as integers.
-        - 'onehot': Encodes categorical variables using one
-          hot encoding (creates dummy variables).
+    transform : {'normalize', 'standardize'}, optional, default: 'normalize'
+        The type of transformation to apply. 'normalize' scales categorical variables from 0 to 1,
+        assigning the highest value the value of 1 and the lowest value the value of 0.
+        'standardize' standardizes numerical variables by subtracting the mean and dividing by the standard deviation.
 
     Returns:
     --------
     np.ndarray or tuple
-        - If label_col_idx is None, returns a NumPy array of processed features.
-        - Otherwise, returns a tuple (features as NumPy array, labels as pandas Series).
+        If label_col_idx is None, returns a NumPy array containing the preprocessed features.
+        If label_col_idx is specified, returns a tuple containing a NumPy array of features and the corresponding labels (as a pandas series).
 
-    Example:
-    --------
+    Examples:
+    ---------
+    >>> import pandas as pd
+    >>> import numpy as np
+
+    >>> # Creating a sample DataFrame
     >>> data = pd.DataFrame({
     ...     'feature1': [1, 2, 3, 4],
     ...     'feature2': [5, 6, 7, 8],
     ...     'label': ['A', 'B', 'A', 'B']
     ... })
+
+    >>> # Preprocessing the data with default parameters
     >>> x, y = dataprep(data)
-    >>> x_standardized, y_standardized = dataprep(data, transform='standardize')
+
+    >>> # Preprocessing the data with standardization
+    >>> x_standardized, y_standardized = dataprep(data, transform = 'standardize')
     """
 
     data = data.copy()
+    categorical_cols = [col for col in data.columns if data[col].dtype == 'object' or data[col].dtype == 'int64']
+    
+    for col in categorical_cols:
+        data[col] = pd.Categorical(data[col]).codes
 
-    # Identify categorical columns and encode them
-    categorical_cols = data.select_dtypes(include=['object', 'int64']).columns
-
-    if encoding == 'onehot':
-        data = pd.get_dummies(data, columns=categorical_cols)
-    elif encoding == 'integer':
-        data[categorical_cols] = data[categorical_cols].apply(lambda col: pd.Categorical(col).codes)
-
-    # Extract label column if specified
-    y = None
     if label_col_idx is not None:
         label = data.columns[label_col_idx]
         y = data.pop(label)
-
-    # Apply transformation
-    if transform == 'standardize':
-        x = data.apply(lambda col: (col - col.mean()) / col.std() if col.std() != 0 else col)
-    elif transform == 'normalize':
-        x = data.apply(lambda col: (col - col.min()) / (col.max() - col.min()) if col.max() != col.min() else col)
+        x = data
     else:
-        raise ValueError("Invalid transform. Choose 'normalize' or 'standardize'.")
+        x = data
 
-    return (x.to_numpy(), y) if label_col_idx is not None else x.to_numpy()
+    if transform == 'standardize':
+        for col in x.columns:
+            if x[col].std() != 0:
+                x[col] = (x[col] - x[col].mean()) / x[col].std()
+    elif transform == 'normalize':
+        for col in x.columns:
+            if x[col].max() != x[col].min():
+                x[col] = (x[col] - x[col].min()) / (x[col].max() - x[col].min())
+
+    if label_col_idx is None:
+        return x.to_numpy()
+    else:
+        return x.to_numpy(), y
