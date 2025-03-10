@@ -6,4 +6,4 @@ scikit_learn
 scipy
 setuptools
 seaborn
-plotly
+# plotly only required for demo
