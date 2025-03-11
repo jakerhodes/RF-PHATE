@@ -57,7 +57,7 @@ def model_embedding_diff(
         model = KNeighborsRegressor if is_continuous(y) else KNeighborsClassifier
     model = model(**(model_kwargs or {}))
 
-    rf_model = RFGAP(y=y, oob_score=True, random_state = random_state)
+    rf_model = RFGAP(y = y, oob_score = True, random_state = random_state)
 
     # Precompute cross-validation splits to avoid redundant computation
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
