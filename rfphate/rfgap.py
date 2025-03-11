@@ -1,6 +1,3 @@
-# I made a change
-
-
 # Imports
 import numpy as np
 from scipy import sparse
@@ -125,6 +122,9 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
                 for a split in each node. In the case of classification, splits are also ignored 
                 if they would result in any single class carrying a negative weight in either child node.
 
+            x_test : {array-like, sparse matrix} of shape (n_samples, n_features)
+                External test set. If included, the proximities will be generated between training and test points.
+
             Returns
             -------
             self : object
@@ -134,7 +134,7 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
             super().fit(X, y, sample_weight)
             self.leaf_matrix = self.apply(X)
 
-            
+            # TODO: May want to update to only generate the test proximities when explicitly called
             if x_test is not None:
                 n_test = np.shape(x_test)[0]
                 

@@ -41,36 +41,32 @@ def dataprep(data, label_col_idx = 0, transform = 'normalize'):
     >>> x, y = dataprep(data)
 
     >>> # Preprocessing the data with standardization
-    >>> x_standardized, y_standardized = dataprep(data, transform='standardize')
+    >>> x_standardized, y_standardized = dataprep(data, transform = 'standardize')
     """
 
     data = data.copy()
-    categorical_cols = []
-    for col in data.columns:
-        if data[col].dtype == 'object' or data[col].dtype == 'int64':
-            categorical_cols.append(col)
-            data[col] = pd.Categorical(data[col]).codes
-
+    categorical_cols = [col for col in data.columns if data[col].dtype == 'object' or data[col].dtype == 'int64']
+    
+    for col in categorical_cols:
+        data[col] = pd.Categorical(data[col]).codes
 
     if label_col_idx is not None:
         label = data.columns[label_col_idx]
-        y     = data.pop(label)
-        x     = data
-
+        y = data.pop(label)
+        x = data
+    else:
+        x = data
 
     if transform == 'standardize':
         for col in x.columns:
-            # if col not in categorical_cols:
-            if data[col].std() !=0:
-                data[col] = (data[col] - data[col].mean()) / data[col].std()
-
+            if x[col].std() != 0:
+                x[col] = (x[col] - x[col].mean()) / x[col].std()
     elif transform == 'normalize':
         for col in x.columns:
-            # if col not in categorical_cols:
-            if data[col].max() != data[col].min():
-                data[col] = (data[col] - data[col].min()) / (data[col].max() - data[col].min())
+            if x[col].max() != x[col].min():
+                x[col] = (x[col] - x[col].min()) / (x[col].max() - x[col].min())
 
     if label_col_idx is None:
-        return np.array(x)
+        return x.to_numpy()
     else:
-        return np.array(x), y
+        return x.to_numpy(), y
