@@ -1,7 +1,7 @@
 
 from sklearn.metrics import silhouette_score
 
-def low_dimensional_group_separation(embedding, y, **kwargs):
+def low_dimensional_group_separation(embedding, y, random_state = None, **kwargs):
     """
     Calculates the silhouette score, a metric for assessing the separation between groups in low-dimensional embeddings.
 
@@ -21,6 +21,6 @@ def low_dimensional_group_separation(embedding, y, **kwargs):
     score : float
         The silhouette score, ranging from -1 to 1, where a higher score indicates better separation between clusters or groups.
     """
-    score = silhouette_score(embedding, y, **kwargs)
+    score = silhouette_score(embedding, y, random_state = random_state, **kwargs)
     return score
 
