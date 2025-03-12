@@ -1,5 +1,5 @@
-README - RF-PHATE
-=================
+RF-PHATE
+========
 
 RF-PHATE is an algorithm that allows the user to create random forest-based supervised, low-dimensional embeddings based on the manifold learning algorithm described in "Gaining Biological Insights through Supervised Data Visualization" [1]_.
 
@@ -20,7 +20,7 @@ Use the package manager `pip` to install RF-PHATE. Rerun this command to check f
 
     pip install git+https://github.com/jakerhodes/RF-PHATE
 
-The random forest implementation is based on either `RandomForestClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_ or `RandomForestRegressor <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html>`_ from `scikit-learn <https://scikit-learn.org/stable/>`_, depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forest model by including either the response variable, `y`, or by stating the `prediction_type` as either 'classification' or 'regression'. If neither `y` nor `prediction_type` is given, RF-PHATE will assume a categorical response. Any training options available for `RandomForestClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_ or `RandomForestRegressor <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html>`_ will work for the RF-PHATE initialization.
+RF-PHATE integrates feature importance from random forests to create meaningful embeddings that highlight relationships in complex data while filtering out irrelevant features. The underlying random forest proximity method, Random Forest Geometry- and Accuracy-Preserving Proximities (RF-GAP), uses SKlearn RF implementations, based on either `RandomForestClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_ or `RandomForestRegressor <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html>`_ from `scikit-learn <https://scikit-learn.org/stable/>`_, depending on the type of response variable (categorical or continuous). The user implicitly chooses the type of random forest model by including either the response variable, `y`, or by stating the `prediction_type` as either 'classification' or 'regression'. If neither `y` nor `prediction_type` is given, RF-PHATE will assume a categorical response. Any training options available for `RandomForestClassifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_ or `RandomForestRegressor <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html>`_ will work for the RF-PHATE initialization.
 
 Quick Demo
 ----------
@@ -30,8 +30,7 @@ Below is a quick demo of how to use RF-PHATE on the Titanic dataset:
 .. code-block:: python
 
     import matplotlib.pyplot as plt
-    from rfphate import RFPHATE
-    from rfphate.dataprep import dataprep
+    from rfphate import RFPHATE, dataprep
     import pandas as pd
     import seaborn as sns
 
