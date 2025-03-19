@@ -44,7 +44,7 @@ def RFGAP(prediction_type = None, y = None, prox_method = 'rfgap', matrix_type =
 
     prox_method : str
         The type of proximity to be constructed.  Options are `original`, `oob`, 
-        or `rfgap` (default is `oob`)
+        or `rfgap` (default is `rfgap`)
 
     matrix_type : str
         Whether the matrix returned proximities whould be sparse or dense 
