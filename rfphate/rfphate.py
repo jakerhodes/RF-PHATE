@@ -1,4 +1,4 @@
-from rfphate.rfgap import RFGAP
+from rfgap import RFGAP
 
 # For PHATE part
 from phate import PHATE
@@ -9,6 +9,8 @@ import graphtools
 from sklearn.exceptions import NotFittedError
 
 from sklearn.utils.validation import check_is_fitted
+from sklearn.preprocessing import normalize as sk_normalize
+
 
 class PageRankPHATE(PHATE): 
     """
@@ -65,6 +67,8 @@ def RFPHATE(prediction_type = None,
             random_state = None,
             verbose = 0,
             non_zero_diagonal = True,
+            normalize = False,
+            force_symmetric = False,
             beta = 0.9,
             self_similarity = False,
             **kwargs):
@@ -170,6 +174,8 @@ def RFPHATE(prediction_type = None,
             random_state = random_state,
             verbose      = verbose,
             non_zero_diagonal = non_zero_diagonal,
+            normalize = normalize,
+            force_symmetric = force_symmetric,
             beta         = beta,
             self_similarity = self_similarity,
             **kwargs
@@ -197,6 +203,8 @@ def RFPHATE(prediction_type = None,
             self.matrix_type = matrix_type
             self.verbose = verbose
             self.non_zero_diagonal = non_zero_diagonal
+            self.normalize = normalize
+            self.force_symmetric = force_symmetric
             self.beta = beta
             self.self_similarity = self_similarity
 
@@ -204,40 +212,55 @@ def RFPHATE(prediction_type = None,
             for k, v in kwargs.items():
                 setattr(self, k, v)
                     
-        # TODO: Update behavior. Instead of adding x_test as an argument, just apply the tranform to x, extending to new points.
-        def transform(self, x, x_test = None):
-            
-            check_is_fitted(self)
 
-            if self.prox_method == 'rfgap' and self.self_similarity:
-                if x_test is None:
-                    self.proximity = self.prox_extend(x)
-                else:
-                    self.proximity = self.prox_extend(np.concatenate([x, x_test]))
+        def _extend_to_data(self, data):
+            """Build transition matrix from new data to the training graph (Full or Landmark)
+        
+            Creates a transition matrix such that `Y` can be approximated by
+            a linear combination of landmarks. Any
+            transformation of the landmarks can be trivially applied to `Y` by
+            performing
+        
+            `transform_Y = transitions.dot(transform)`
+        
+            Parameters
+            ----------
+        
+            Y: array-like, [n_samples_y, n_features]
+                new data for which an affinity matrix is calculated
+                to the existing data. `n_features` must match
+                either the ambient or PCA dimensions
+        
+            Returns
+            -------
+        
+            transitions : array-like, [n_samples_y, self.data.shape[0]]
+                Transition matrix from `Y` to `self.data`
+            """
+            kernel = self.prox_extend(data)
+            if isinstance(self.phate_op.graph, graphtools.graphs.LandmarkGraph):
+                pnm = sparse.hstack(
+                    [
+                        sparse.csr_matrix(kernel[:, self.phate_op.graph.clusters == i].sum(axis=1))
+                        for i in np.unique(self.phate_op.graph.clusters)
+                    ]
+                )
+                pnm = sk_normalize(pnm, norm="l1", axis=1)
             else:
-                self.proximity = self.get_proximities()
+                pnm = sk_normalize(kernel, norm="l1", axis=1)
+            return pnm
+        
 
-            
-            phate_op = PageRankPHATE(n_components = self.n_components,
-                t = self.t,
-                n_landmark = self.n_landmark,
-                mds = self.mds,
-                n_pca = self.n_pca,
-                knn_dist = self.knn_dist,
-                mds_dist = self.mds_dist,
-                mds_solver = self.mds_solver,
-                random_state = self.random_state,
-                verbose = self.verbose, 
-                beta = self.beta)
-            
-            self.phate_op = phate_op
-            self.embedding_ = phate_op.fit_transform(self.proximity)
-            
-            return self.embedding_
-            
-            
-        def _fit_transform(self, x, y, x_test = None, sample_weight = None):
-
+        #NOTE: the output of fit(x,y) followed by transform(x) is NOT equivalent to fit_transform(x,y) because transform() uses prox_extend to build extended proximities (even on training points)
+        def transform(self, data):
+            """Basic linear kernel extension for new points in the embedding space"""
+            check_is_fitted(self)
+            pnm = self._extend_to_data(data)
+            return self.phate_op.graph.interpolate(self.phate_op.embedding, pnm)
+        
+        
+        def _fit_transform(self, x, y):
+        
             """Internal method for fitting and transforming the data
             
             Parameters
@@ -245,70 +268,55 @@ def RFPHATE(prediction_type = None,
             x : {array-like, sparse matrix} of shape (n_samples, n_features)
                 The training input samples. Internally, its dtype will be converted to dtype=np.float32.
                 If a sparse matrix is provided, it will be converted into a sparse csc_matrix.
-
+        
             y : array-like of shape (n_samples,) or (n_samples, n_outputs)
                 The target values (class labels in classification, real numbers in regression).
-                
-            x_test : {array-like, sparse matrix} of shape (n__test_samples, n_features)
-                An optional test set. The training set buildes the RF-PHATE model, but the 
-                embedding can be extended to this test set.
             """
-
-            n,  _= x.shape
-            
-            self.fit(x, y, x_test = x_test, sample_weight = sample_weight)
-            self.is_fitted_ = True
-
-            self.embedding_ = self.transform(x, x_test = x_test)
-
-            # if self.prox_method == 'rfgap' and self.self_similarity:
-            #     if x_test is None:
-            #         proximity = self.prox_extend(x)
-            #     else:
-            #         proximity = self.prox_extend(np.concatenate([x, x_test]))
-            # else:
-            #     proximity = self.get_proximities()
+                    
+            self.fit(x, y)
+        
+            if self.prox_method == 'rfgap' and self.self_similarity:
+                proximity = self.prox_extend(x)
+            else:
+                proximity = self.get_proximities()
                             
-            # TODO: Don't generate phate_op in both transform and fit_transform
-            # phate_op = PageRankPHATE(n_components = self.n_components,
-            #     t = self.t,
-            #     n_landmark = self.n_landmark,
-            #     mds = self.mds,
-            #     n_pca = self.n_pca,
-            #     knn_dist = self.knn_dist,
-            #     mds_dist = self.mds_dist,
-            #     mds_solver = self.mds_solver,
-            #     random_state = self.random_state,
-            #     verbose = self.verbose, 
-            #     beta = self.beta)
+            phate_op = PageRankPHATE(n_components = self.n_components,
+                    t = self.t,
+                    n_landmark = self.n_landmark,
+                    mds = self.mds,
+                    n_pca = self.n_pca,
+                    knn_dist = self.knn_dist,
+                    mds_dist = self.mds_dist,
+                    mds_solver = self.mds_solver,
+                    random_state = self.random_state,
+                    verbose = self.verbose, 
+                    beta = self.beta)
             
-            # self.phate_op = phate_op
-
-            # self.embedding_ = phate_op.fit_transform(proximity)
-
-        def fit_transform(self, x, y, x_test = None, sample_weight = None):
-
+            self.phate_op = phate_op
+        
+            self.embedding_ = phate_op.fit_transform(proximity)
+            self.proximity = proximity
+        
+        def fit_transform(self, x, y):
+        
             """Applies _fit_tranform to the data, x, y, and returns the RF-PHATE embedding
-
+        
             x : {array-like, sparse matrix} of shape (n_samples, n_features)
                 The training input samples. Internally, its dtype will be converted to dtype=np.float32.
                 If a sparse matrix is provided, it will be converted into a sparse csc_matrix.
-
+        
             y : array-like of shape (n_samples,) or (n_samples, n_outputs)
                 The target values (class labels in classification, real numbers in regression).
-                
-            x_test : {array-like, sparse matrix} of shape (n__test_samples, n_features)
-                An optional test set. The training set buildes the RF-PHATE model, but the 
-                embedding can be extended to this test set.
-
-
+        
+        
             Returns
             -------
             array-like (n_features, n_components)
                 A lower-dimensional representation of the data following the RF-PHATE algorithm
             """
-            self._fit_transform(x, y, x_test, sample_weight = sample_weight)
+            self._fit_transform(x, y)
             return self.embedding_
+            
 
     return RFPHATE(    
                 n_components = n_components,
@@ -324,6 +332,8 @@ def RFPHATE(prediction_type = None,
                 random_state = random_state,
                 verbose = verbose,
                 non_zero_diagonal = non_zero_diagonal,
+                normalize = normalize,
+                force_symmetric = force_symmetric,
                 beta = beta,
                 self_similarity = self_similarity,
                 **kwargs)
