@@ -1,4 +1,4 @@
-import pkg_resources
+from importlib.resources import files  # No more pkg_resources (deprecated)
 import pandas as pd
 
 
@@ -34,6 +34,6 @@ def load_data(name = 'iris'):
         raise NameError("{} is not recognized. The only names are 'iris', 'titanic', 'auto-mpg', and 'artificial_tree'.".format(name))
     
 
-    data_path = pkg_resources.resource_filename('rfphate', path)
+    data_path = files("rfphate").joinpath(path)
     
     return pd.read_csv(data_path)
