@@ -3,7 +3,7 @@ from sklearn.model_selection import KFold
 from sklearn.base import clone
 import numpy as np
 import pandas as pd
-from rfphate.rfgap import RFGAP
+from rfgap import RFGAP
 from joblib import Parallel, delayed
 
 def is_continuous(y: np.ndarray) -> bool:
