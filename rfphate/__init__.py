@@ -1,6 +1,6 @@
 from .rfphate import RFPHATE
 from .rfphate import PageRankPHATE
-import rfphate.rfgap
+import rfgap
 from rfphate.dataprep import dataprep
 from rfphate.load_data import load_data
 
