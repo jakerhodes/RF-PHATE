@@ -66,8 +66,10 @@ def RFPHATE(prediction_type = None,
             n_jobs = 1,
             random_state = None,
             verbose = 0,
+            triangular = True,
             non_zero_diagonal = True,
             force_symmetric = False,
+            batch_size = 'auto',
             beta = 0.9,
             self_similarity = False,
             **kwargs):
@@ -130,10 +132,20 @@ def RFPHATE(prediction_type = None,
 
     verbose : int or bool
         If `True` or `> 0`, print status messages (default is 0)
+    
+    triangular : bool
+        Whether the proximity matrix is filled triangularly in original and oob proximities. (default is True)
 
     non_zero_diagonal: bool
         Only used if prox_method == 'rfgap'.  Replaces the zero-diagonal entries
         of the rfgap proximities with ones (default is True)
+    
+    force_symmetric : bool
+        Enforce symmetry of proximities. (default is False)
+    
+    batch_size : int or 'auto'
+        The size of batches to use when computing proximities. If set to 'auto', the batch size
+        will be determined heuristically based on the number of samples. (default is 'auto')
 
     beta : float
         The damping factor for the PageRank algorithm. The range is (0, 1). Values
@@ -172,8 +184,10 @@ def RFPHATE(prediction_type = None,
             n_jobs       = n_jobs,
             random_state = random_state,
             verbose      = verbose,
+            triangular   = triangular,
             non_zero_diagonal = non_zero_diagonal,
             force_symmetric = force_symmetric,
+            batch_size = batch_size,
             beta         = beta,
             self_similarity = self_similarity,
             **kwargs
@@ -200,8 +214,10 @@ def RFPHATE(prediction_type = None,
             self.prox_method = prox_method
             self.matrix_type = matrix_type
             self.verbose = verbose
+            self.triangular = triangular
             self.non_zero_diagonal = non_zero_diagonal
             self.force_symmetric = force_symmetric
+            self.batch_size = batch_size
             self.beta = beta
             self.self_similarity = self_similarity
 
@@ -328,8 +344,10 @@ def RFPHATE(prediction_type = None,
                 n_jobs = n_jobs,
                 random_state = random_state,
                 verbose = verbose,
+                triangular = triangular,
                 non_zero_diagonal = non_zero_diagonal,
                 force_symmetric = force_symmetric,
+                batch_size = batch_size,
                 beta = beta,
                 self_similarity = self_similarity,
                 **kwargs)
