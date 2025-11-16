@@ -68,6 +68,7 @@ def RFPHATE(prediction_type = None,
             verbose = 0,
             triangular = True,
             non_zero_diagonal = True,
+            normalize = True,
             force_symmetric = False,
             batch_size = 'auto',
             beta = 0.9,
@@ -140,6 +141,9 @@ def RFPHATE(prediction_type = None,
         Only used if prox_method == 'rfgap'.  Replaces the zero-diagonal entries
         of the rfgap proximities with ones (default is True)
     
+    normalize : bool
+        Whether to 0-1 normalize the proximities. (default is True)
+    
     force_symmetric : bool
         Enforce symmetry of proximities. (default is False)
     
@@ -186,6 +190,7 @@ def RFPHATE(prediction_type = None,
             verbose      = verbose,
             triangular   = triangular,
             non_zero_diagonal = non_zero_diagonal,
+            normalize    = normalize,
             force_symmetric = force_symmetric,
             batch_size = batch_size,
             beta         = beta,
@@ -216,6 +221,7 @@ def RFPHATE(prediction_type = None,
             self.verbose = verbose
             self.triangular = triangular
             self.non_zero_diagonal = non_zero_diagonal
+            self.normalize = normalize
             self.force_symmetric = force_symmetric
             self.batch_size = batch_size
             self.beta = beta
@@ -346,6 +352,7 @@ def RFPHATE(prediction_type = None,
                 verbose = verbose,
                 triangular = triangular,
                 non_zero_diagonal = non_zero_diagonal,
+                normalize = normalize,
                 force_symmetric = force_symmetric,
                 batch_size = batch_size,
                 beta = beta,
