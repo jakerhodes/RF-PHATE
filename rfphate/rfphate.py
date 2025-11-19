@@ -257,6 +257,7 @@ def RFPHATE(prediction_type = None,
                 Transition matrix from `Y` to `self.data`
             """
             kernel = self.prox_extend(data)
+            self.proximity_test = kernel
             if isinstance(self.phate_op.graph, graphtools.graphs.LandmarkGraph):
                 pnm = sparse.hstack(
                     [
