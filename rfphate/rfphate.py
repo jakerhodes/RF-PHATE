@@ -248,28 +248,19 @@ def RFPHATE(prediction_type = None,
                 # remapped_clusters: the indices from 0 to len(unique)-1
                 unique_clusters, remapped_clusters = np.unique(clusters, return_inverse=True)
                 n_landmarks = len(unique_clusters)
-                
                 row_idx = np.arange(n_train_points)
-                col_idx = remapped_clusters 
-
+                col_idx = remapped_clusters
                 data_ones = np.ones(n_train_points)
-                
                 cluster_map = sparse.csc_matrix(
                     (data_ones, (row_idx, col_idx)), 
                     shape=(n_train_points, n_landmarks)
                 )
                 
                 pnm = kernel @ cluster_map
-                
-                if not sparse.issparse(pnm):
-                    pnm = sparse.csr_matrix(pnm)
-                
                 pnm = normalize(pnm, norm="l1", axis=1)
                 
             else:
                 pnm = normalize(kernel, norm="l1", axis=1)
-                if not sparse.issparse(pnm):
-                    pnm = sparse.csr_matrix(pnm)
                 
             return pnm
   
@@ -316,9 +307,7 @@ def RFPHATE(prediction_type = None,
                     beta = self.beta)
             
             self.phate_op = phate_op
-        
             self.embedding_ = phate_op.fit_transform(proximity)
-            self.proximity = proximity
         
         def fit_transform(self, x, y):
         
