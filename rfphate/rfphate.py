@@ -237,42 +237,42 @@ def RFPHATE(prediction_type = None,
                 Transition matrix from `Y` to `self.data`
             """
             kernel = self.prox_extend(data)
-            
-            # Check if using Landmark Graph
+                        
             if isinstance(self.phate_op.graph, graphtools.graphs.LandmarkGraph):
                 
-                # Get cluster assignments (n_samples,)
                 clusters = self.phate_op.graph.clusters
                 n_train_points = kernel.shape[1]
-                n_landmarks = len(np.unique(clusters))
                 
-                # instead of looping and slicing, construct a sparse
-                # "membership matrix" mapping points to landmarks.
-                # Shape: (n_train_points, n_landmarks)
-                # Row indices: 0 to n_train_points
-                # Col indices: cluster assignment for each point
+                # Remap cluster IDs to be contiguous (0 to N_active-1)
+                # unique_clusters: the sorted unique IDs
+                # remapped_clusters: the indices from 0 to len(unique)-1
+                unique_clusters, remapped_clusters = np.unique(clusters, return_inverse=True)
+                n_landmarks = len(unique_clusters)
+                
                 row_idx = np.arange(n_train_points)
-                col_idx = clusters
+                col_idx = remapped_clusters 
+
                 data_ones = np.ones(n_train_points)
                 
-                # create CSC matrix for efficient column operations during multiplication
                 cluster_map = sparse.csc_matrix(
                     (data_ones, (row_idx, col_idx)), 
                     shape=(n_train_points, n_landmarks)
                 )
                 
-                # perform the summation via Matrix Multiplication
-                # (n_new, n_train) @ (n_train, n_landmarks) -> (n_new, n_landmarks)
                 pnm = kernel @ cluster_map
                 
-                # Normalize
+                if not sparse.issparse(pnm):
+                    pnm = sparse.csr_matrix(pnm)
+                
                 pnm = normalize(pnm, norm="l1", axis=1)
                 
             else:
                 pnm = normalize(kernel, norm="l1", axis=1)
+                if not sparse.issparse(pnm):
+                    pnm = sparse.csr_matrix(pnm)
                 
             return pnm
-        
+  
 
         #NOTE: the output of fit(x,y) followed by transform(x) is NOT equivalent to fit_transform(x,y) because transform() uses prox_extend to build extended proximities (even on training points)
         def transform(self, data):
