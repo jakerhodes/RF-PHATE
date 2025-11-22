@@ -237,24 +237,40 @@ def RFPHATE(prediction_type = None,
                 Transition matrix from `Y` to `self.data`
             """
             kernel = self.prox_extend(data)
+            
+            # Check if using Landmark Graph
             if isinstance(self.phate_op.graph, graphtools.graphs.LandmarkGraph):
-                if sparse.issparse(kernel):
-                    pnm = sparse.hstack(
-                        [
-                            sparse.csr_matrix(kernel[:, self.phate_op.graph.clusters == i].sum(axis=1))
-                            for i in np.unique(self.phate_op.graph.clusters)
-                        ]
-                    )
-                else:
-                    pnm = np.array(
-                        [
-                            np.sum(kernel[:, self.phate_op.graph.clusters == i], axis=1).T
-                            for i in np.unique(self.phate_op.graph.clusters)
-                        ]
-                    ).transpose()
+                
+                # Get cluster assignments (n_samples,)
+                clusters = self.phate_op.graph.clusters
+                n_train_points = kernel.shape[1]
+                n_landmarks = len(np.unique(clusters))
+                
+                # instead of looping and slicing, construct a sparse
+                # "membership matrix" mapping points to landmarks.
+                # Shape: (n_train_points, n_landmarks)
+                # Row indices: 0 to n_train_points
+                # Col indices: cluster assignment for each point
+                row_idx = np.arange(n_train_points)
+                col_idx = clusters
+                data_ones = np.ones(n_train_points)
+                
+                # create CSC matrix for efficient column operations during multiplication
+                cluster_map = sparse.csc_matrix(
+                    (data_ones, (row_idx, col_idx)), 
+                    shape=(n_train_points, n_landmarks)
+                )
+                
+                # perform the summation via Matrix Multiplication
+                # (n_new, n_train) @ (n_train, n_landmarks) -> (n_new, n_landmarks)
+                pnm = kernel @ cluster_map
+                
+                # Normalize
                 pnm = normalize(pnm, norm="l1", axis=1)
+                
             else:
                 pnm = normalize(kernel, norm="l1", axis=1)
+                
             return pnm
         
 
