@@ -9,7 +9,7 @@ import graphtools
 from sklearn.exceptions import NotFittedError
 
 from sklearn.utils.validation import check_is_fitted
-from sklearn.preprocessing import normalize as sk_normalize
+from sklearn.preprocessing import normalize
 
 
 class PageRankPHATE(PHATE): 
@@ -212,7 +212,7 @@ def RFPHATE(prediction_type = None,
                 setattr(self, k, v)
                     
 
-        def _extend_to_data(self, data):
+        def extend_to_data(self, data):
             """Build transition matrix from new data to the training graph (Full or Landmark)
         
             Creates a transition matrix such that `Y` can be approximated by
@@ -237,17 +237,24 @@ def RFPHATE(prediction_type = None,
                 Transition matrix from `Y` to `self.data`
             """
             kernel = self.prox_extend(data)
-            self.proximity_test = kernel
             if isinstance(self.phate_op.graph, graphtools.graphs.LandmarkGraph):
-                pnm = sparse.hstack(
-                    [
-                        sparse.csr_matrix(kernel[:, self.phate_op.graph.clusters == i].sum(axis=1))
-                        for i in np.unique(self.phate_op.graph.clusters)
-                    ]
-                )
-                pnm = sk_normalize(pnm, norm="l1", axis=1)
+                if sparse.issparse(kernel):
+                    pnm = sparse.hstack(
+                        [
+                            sparse.csr_matrix(kernel[:, self.phate_op.graph.clusters == i].sum(axis=1))
+                            for i in np.unique(self.phate_op.graph.clusters)
+                        ]
+                    )
+                else:
+                    pnm = np.array(
+                        [
+                            np.sum(kernel[:, self.phate_op.graph.clusters == i], axis=1).T
+                            for i in np.unique(self.phate_op.graph.clusters)
+                        ]
+                    ).transpose()
+                pnm = normalize(pnm, norm="l1", axis=1)
             else:
-                pnm = sk_normalize(kernel, norm="l1", axis=1)
+                pnm = normalize(kernel, norm="l1", axis=1)
             return pnm
         
 
@@ -255,7 +262,7 @@ def RFPHATE(prediction_type = None,
         def transform(self, data):
             """Basic linear kernel extension for new points in the embedding space"""
             check_is_fitted(self)
-            pnm = self._extend_to_data(data)
+            pnm = self.extend_to_data(data)
             return self.phate_op.graph.interpolate(self.phate_op.embedding, pnm)
         
         
