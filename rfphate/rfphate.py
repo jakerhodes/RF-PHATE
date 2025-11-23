@@ -56,6 +56,7 @@ def RFPHATE(prediction_type = None,
             y = None,           
             n_components = 2,
             prox_method = 'rfgap',
+            model_type = 'rf',
             matrix_type = 'sparse',
             n_landmark = 2000,
             t = "auto",
@@ -87,6 +88,11 @@ def RFPHATE(prediction_type = None,
 
     matrix_type : str
         Whether the proximity type should be 'sparse' or 'dense' (default is sparse)
+    
+    model_type : str
+        'rf' for RandomForest (default) or 'et' for ExtraTrees.
+        Note: If 'et' is selected, bootstrap will be set to True by default unless explicitly 
+        set to False in kwargs (though True is required for RFGAP proximity calculations).
     
     n_landmark : int, optional
         number of landmarks to use in fast PHATE (default is 2000)
@@ -155,7 +161,7 @@ def RFPHATE(prediction_type = None,
         prediction_type = 'classification'
         
     # In the rfgap module, rf is defined without arguments
-    rf = RFGAP(prediction_type = prediction_type, y = y, **kwargs)
+    rf = RFGAP(prediction_type = prediction_type, y = y, model_type = model_type, **kwargs)
 
     class RFPHATE(rf.__class__, PageRankPHATE):
     # class RFPHATE(PageRankPHATE):
