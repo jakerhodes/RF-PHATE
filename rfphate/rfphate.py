@@ -68,7 +68,8 @@ def RFPHATE(prediction_type = None,
             random_state = None,
             verbose = 0,
             non_zero_diagonal = True,
-            force_symmetric = False,
+            force_symmetric = True,
+            kernel_symm = None,
             beta = 0.9,
             self_similarity = False,
             **kwargs):
@@ -96,7 +97,7 @@ def RFPHATE(prediction_type = None,
     
     n_landmark : int, optional
         number of landmarks to use in fast PHATE (default is 2000)
-
+    
     t : int, optional
         power to which the diffusion operator is powered.
         This sets the level of diffusion. If 'auto', t is selected
@@ -141,7 +142,13 @@ def RFPHATE(prediction_type = None,
         of the rfgap proximities with ones (default is True)
     
     force_symmetric : bool
-        Enforce symmetry of proximities. (default is False)
+        Enforce symmetry of proximities. (default is True)
+    
+    kernel_symm : str, optional
+        choose from [None, 'avg', 'min', 'max'].
+        Selects which kernel symmetrization method is used for building the underlying PHATE diffusion operator.
+        Note: Using force_symmetric=True is generally preferred over internal kernel_symm for memory and runtime savings.
+        (default is None)
 
     beta : float
         The damping factor for the PageRank algorithm. The range is (0, 1). Values
@@ -182,6 +189,7 @@ def RFPHATE(prediction_type = None,
             verbose      = verbose,
             non_zero_diagonal = non_zero_diagonal,
             force_symmetric = force_symmetric,
+            kernel_symm  = kernel_symm,
             beta         = beta,
             self_similarity = self_similarity,
             **kwargs
@@ -195,6 +203,7 @@ def RFPHATE(prediction_type = None,
             self.mds = mds
             self.n_pca = n_pca
             self.knn_dist = 'precomputed_affinity'
+            self.kernel_symm = kernel_symm
             self.mds_dist = mds_dist
             self.mds_solver = mds_solver
             self.random_state = random_state
@@ -303,6 +312,7 @@ def RFPHATE(prediction_type = None,
             phate_op = PageRankPHATE(n_components = self.n_components,
                     t = self.t,
                     n_landmark = self.n_landmark,
+                    kernel_symm = self.kernel_symm,
                     mds = self.mds,
                     n_pca = self.n_pca,
                     knn_dist = self.knn_dist,
@@ -351,6 +361,7 @@ def RFPHATE(prediction_type = None,
                 verbose = verbose,
                 non_zero_diagonal = non_zero_diagonal,
                 force_symmetric = force_symmetric,
+                kernel_symm = kernel_symm,
                 beta = beta,
                 self_similarity = self_similarity,
                 **kwargs)
