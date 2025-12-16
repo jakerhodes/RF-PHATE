@@ -145,7 +145,6 @@ def RFPHATE(prediction_type = None,
         Enforce symmetry of proximities. (default is True)
     
     kernel_symm : str, optional
-        choose from [None, 'avg', 'min', 'max'].
         Selects which kernel symmetrization method is used for building the underlying PHATE diffusion operator.
         Note: Using force_symmetric=True is generally preferred over internal kernel_symm for memory and runtime savings.
         (default is None)
@@ -288,7 +287,7 @@ def RFPHATE(prediction_type = None,
             return self.phate_op.graph.interpolate(self.phate_op.embedding, pnm)
         
         
-        def _fit_transform(self, x, y):
+        def _fit_transform(self, x, y, x_u=None):
         
             """Internal method for fitting and transforming the data
             
@@ -300,14 +299,20 @@ def RFPHATE(prediction_type = None,
         
             y : array-like of shape (n_samples,) or (n_samples, n_outputs)
                 The target values (class labels in classification, real numbers in regression).
+            
+            x_u : {array-like, sparse matrix} of shape (n_samples_u, n_features}
+                The unlabeled input samples for semi-supervised RF-PHATE.
             """
                     
-            self.fit(x, y)
+            self.fit(x, y, x_u)
         
             if self.prox_method == 'rfgap' and self.self_similarity:
-                proximity = self.prox_extend(x)
+                proximity = self.prox_extend(np.vstack([x, x_u]) if x_u is not None else x)
+                self.kernel_symm = '+'  # Force built-in graphtools symmetrization here because prox_extend may not be symmetric
             else:
                 proximity = self.get_proximities()
+                if not self.force_symmetric:
+                    self.kernel_symm = '+' # Force built-in graphtools symmetrization here because this may not be symmetric
                             
             phate_op = PageRankPHATE(n_components = self.n_components,
                     t = self.t,
@@ -325,7 +330,7 @@ def RFPHATE(prediction_type = None,
             self.phate_op = phate_op
             self.embedding_ = phate_op.fit_transform(proximity)
         
-        def fit_transform(self, x, y):
+        def fit_transform(self, x, y, x_u=None):
         
             """Applies _fit_tranform to the data, x, y, and returns the RF-PHATE embedding
         
@@ -335,6 +340,9 @@ def RFPHATE(prediction_type = None,
         
             y : array-like of shape (n_samples,) or (n_samples, n_outputs)
                 The target values (class labels in classification, real numbers in regression).
+            
+            x_u : {array-like, sparse matrix} of shape (n_samples_u, n_features}
+                The unlabeled input samples for semi-supervised RF-PHATE.
         
         
             Returns
@@ -342,7 +350,7 @@ def RFPHATE(prediction_type = None,
             array-like (n_features, n_components)
                 A lower-dimensional representation of the data following the RF-PHATE algorithm
             """
-            self._fit_transform(x, y)
+            self._fit_transform(x, y, x_u)
             return self.embedding_
             
 
