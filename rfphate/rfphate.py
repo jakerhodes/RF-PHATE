@@ -287,7 +287,7 @@ def RFPHATE(prediction_type = None,
             return self.phate_op.graph.interpolate(self.phate_op.embedding, pnm)
         
         
-        def _fit_transform(self, x, y, x_u=None):
+        def _fit_transform(self, x, y):
         
             """Internal method for fitting and transforming the data
             
@@ -299,15 +299,12 @@ def RFPHATE(prediction_type = None,
         
             y : array-like of shape (n_samples,) or (n_samples, n_outputs)
                 The target values (class labels in classification, real numbers in regression).
-            
-            x_u : {array-like, sparse matrix} of shape (n_samples_u, n_features}
-                The unlabeled input samples for semi-supervised RF-PHATE.
             """
                     
-            self.fit(x, y, x_u)
+            self.fit(x, y)
         
             if self.prox_method == 'rfgap' and self.self_similarity:
-                proximity = self.prox_extend(np.vstack([x, x_u]) if x_u is not None else x)
+                proximity = self.prox_extend(x)
                 self.kernel_symm = '+'  # Force built-in graphtools symmetrization here because prox_extend may not be symmetric
             else:
                 proximity = self.get_proximities()
@@ -330,7 +327,7 @@ def RFPHATE(prediction_type = None,
             self.phate_op = phate_op
             self.embedding_ = phate_op.fit_transform(proximity)
         
-        def fit_transform(self, x, y, x_u=None):
+        def fit_transform(self, x, y):
         
             """Applies _fit_tranform to the data, x, y, and returns the RF-PHATE embedding
         
@@ -340,9 +337,6 @@ def RFPHATE(prediction_type = None,
         
             y : array-like of shape (n_samples,) or (n_samples, n_outputs)
                 The target values (class labels in classification, real numbers in regression).
-            
-            x_u : {array-like, sparse matrix} of shape (n_samples_u, n_features}
-                The unlabeled input samples for semi-supervised RF-PHATE.
         
         
             Returns
@@ -350,7 +344,7 @@ def RFPHATE(prediction_type = None,
             array-like (n_features, n_components)
                 A lower-dimensional representation of the data following the RF-PHATE algorithm
             """
-            self._fit_transform(x, y, x_u)
+            self._fit_transform(x, y)
             return self.embedding_
             
 
