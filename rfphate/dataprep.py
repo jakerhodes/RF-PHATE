@@ -45,8 +45,8 @@ def dataprep(data, label_col_idx = 0, transform = 'normalize'):
     """
 
     data = data.copy()
-    categorical_cols = [col for col in data.columns if data[col].dtype == 'object' or data[col].dtype == 'int64']
-    
+    categorical_cols = data.select_dtypes(exclude=[np.number]).columns.tolist()  
+      
     for col in categorical_cols:
         data[col] = pd.Categorical(data[col]).codes
 
