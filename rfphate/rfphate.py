@@ -68,7 +68,7 @@ def RFPHATE(prediction_type = None,
             random_state = None,
             verbose = 0,
             non_zero_diagonal = True,
-            force_symmetric = True,
+            symm_mode = 'arithmetic',
             kernel_symm = None,
             beta = 0.9,
             self_similarity = False,
@@ -141,12 +141,12 @@ def RFPHATE(prediction_type = None,
         Only used if prox_method == 'rfgap'.  Replaces the zero-diagonal entries
         of the rfgap proximities with ones (default is True)
     
-    force_symmetric : bool
-        Enforce symmetry of proximities. (default is True)
+    symm_mode : str or None
+        Enforce symmetry of proximities using specified approach. (default is 'arithmetic')
     
     kernel_symm : str, optional
         Selects which kernel symmetrization method is used for building the underlying PHATE diffusion operator.
-        Note: Using force_symmetric=True is generally preferred over internal kernel_symm for memory and runtime savings.
+        Note: Using symm_mode is generally preferred over internal kernel_symm for memory and runtime savings.
         (default is None)
 
     beta : float
@@ -187,7 +187,7 @@ def RFPHATE(prediction_type = None,
             random_state = random_state,
             verbose      = verbose,
             non_zero_diagonal = non_zero_diagonal,
-            force_symmetric = force_symmetric,
+            symm_mode = symm_mode,
             kernel_symm  = kernel_symm,
             beta         = beta,
             self_similarity = self_similarity,
@@ -217,7 +217,7 @@ def RFPHATE(prediction_type = None,
             self.matrix_type = matrix_type
             self.verbose = verbose
             self.non_zero_diagonal = non_zero_diagonal
-            self.force_symmetric = force_symmetric
+            self.symm_mode = symm_mode
             self.beta = beta
             self.self_similarity = self_similarity
 
@@ -308,7 +308,7 @@ def RFPHATE(prediction_type = None,
                 self.kernel_symm = '+'  # Force built-in graphtools symmetrization here because prox_extend may not be symmetric
             else:
                 proximity = self.get_proximities()
-                if not self.force_symmetric:
+                if self.symm_mode is None:
                     self.kernel_symm = '+' # Force built-in graphtools symmetrization here because this may not be symmetric
                             
             phate_op = PageRankPHATE(n_components = self.n_components,
@@ -362,7 +362,7 @@ def RFPHATE(prediction_type = None,
                 random_state = random_state,
                 verbose = verbose,
                 non_zero_diagonal = non_zero_diagonal,
-                force_symmetric = force_symmetric,
+                symm_mode = symm_mode,
                 kernel_symm = kernel_symm,
                 beta = beta,
                 self_similarity = self_similarity,
