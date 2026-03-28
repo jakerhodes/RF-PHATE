@@ -3,7 +3,7 @@ from sklearn.model_selection import KFold
 from sklearn.base import clone
 import numpy as np
 import pandas as pd
-from rfgap import RFGAP
+from forestkernel import ForestKernel
 from joblib import Parallel, delayed
 
 def is_continuous(y: np.ndarray) -> bool:
@@ -28,11 +28,11 @@ def evaluate_fold(model, rf_model, x, y, embedding, train_idx, test_idx):
     knn.fit(emb_train, y_train)
     knn_score_emb = knn.score(emb_test, y_test)
 
-    # RFGAP on original data
+    # ForestKernel on original data
     rf.fit(x_train, y_train)
     rf_score_x = rf.score(x_test, y_test)
 
-    # RFGAP on embedding
+    # ForestKernel on embedding
     rf.fit(emb_train, y_train)
     rf_score_emb = rf.score(emb_test, y_test)
 
@@ -57,7 +57,7 @@ def model_embedding_diff(
         model = KNeighborsRegressor if is_continuous(y) else KNeighborsClassifier
     model = model(**(model_kwargs or {}))
 
-    rf_model = RFGAP(y = y, oob_score = True, random_state = random_state)
+    rf_model = ForestKernel(y = y, oob_score = True, random_state = random_state)
 
     # Precompute cross-validation splits to avoid redundant computation
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)

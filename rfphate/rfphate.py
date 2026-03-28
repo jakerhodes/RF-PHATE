@@ -1,4 +1,4 @@
-from rfgap import RFGAP
+from forestkernel import ForestKernel
 
 # For PHATE part
 from phate import PHATE
@@ -55,7 +55,7 @@ class PageRankPHATE(PHATE):
 def RFPHATE(prediction_type = None,
             y = None,           
             n_components = 2,
-            prox_method = 'rfgap',
+            prox_method = 'gap',
             model_type = 'rf',
             matrix_type = 'sparse',
             n_landmark = 2000,
@@ -67,8 +67,8 @@ def RFPHATE(prediction_type = None,
             n_jobs = 1,
             random_state = None,
             verbose = 0,
-            non_zero_diagonal = True,
-            symm_mode = 'arithmetic',
+            force_nonzero_diag = True,
+            force_symmetric = True,
             kernel_symm = None,
             beta = 0.9,
             self_similarity = False,
@@ -137,11 +137,11 @@ def RFPHATE(prediction_type = None,
     verbose : int or bool
         If `True` or `> 0`, print status messages (default is 0)
 
-    non_zero_diagonal: bool
+    force_nonzero_diag: bool
         Only used if prox_method == 'rfgap'.  Replaces the zero-diagonal entries
         of the rfgap proximities with ones (default is True)
     
-    symm_mode : str or None
+    force_symmetric : str or None
         Enforce symmetry of proximities using specified approach. (default is 'arithmetic')
     
     kernel_symm : str, optional
@@ -167,7 +167,13 @@ def RFPHATE(prediction_type = None,
         prediction_type = 'classification'
         
     # In the rfgap module, rf is defined without arguments
-    rf = RFGAP(prediction_type = prediction_type, y = y, model_type = model_type, **kwargs)
+    rf = ForestKernel(
+        prediction_type=prediction_type,
+        y=y,
+        prox_method=prox_method,
+        model_type=model_type,
+        **kwargs,
+    )
 
     class RFPHATE(rf.__class__, PageRankPHATE):
     # class RFPHATE(PageRankPHATE):
@@ -186,8 +192,8 @@ def RFPHATE(prediction_type = None,
             n_jobs       = n_jobs,
             random_state = random_state,
             verbose      = verbose,
-            non_zero_diagonal = non_zero_diagonal,
-            symm_mode = symm_mode,
+            force_nonzero_diag = force_nonzero_diag,
+            force_symmetric = force_symmetric,
             kernel_symm  = kernel_symm,
             beta         = beta,
             self_similarity = self_similarity,
@@ -216,8 +222,8 @@ def RFPHATE(prediction_type = None,
             self.prox_method = prox_method
             self.matrix_type = matrix_type
             self.verbose = verbose
-            self.non_zero_diagonal = non_zero_diagonal
-            self.symm_mode = symm_mode
+            self.force_nonzero_diag = force_nonzero_diag
+            self.force_symmetric = force_symmetric
             self.beta = beta
             self.self_similarity = self_similarity
 
@@ -303,12 +309,12 @@ def RFPHATE(prediction_type = None,
                     
             self.fit(x, y)
         
-            if self.prox_method == 'rfgap' and self.self_similarity:
+            if self.prox_method == 'gap' and self.self_similarity:
                 proximity = self.prox_extend(x)
                 self.kernel_symm = '+'  # Force built-in graphtools symmetrization here because prox_extend may not be symmetric
             else:
                 proximity = self.get_proximities()
-                if self.symm_mode is None:
+                if self.force_symmetric is False:
                     self.kernel_symm = '+' # Force built-in graphtools symmetrization here because this may not be symmetric
                             
             phate_op = PageRankPHATE(n_components = self.n_components,
@@ -361,8 +367,8 @@ def RFPHATE(prediction_type = None,
                 n_jobs = n_jobs,
                 random_state = random_state,
                 verbose = verbose,
-                non_zero_diagonal = non_zero_diagonal,
-                symm_mode = symm_mode,
+                force_nonzero_diag = force_nonzero_diag,
+                force_symmetric = force_symmetric,
                 kernel_symm = kernel_symm,
                 beta = beta,
                 self_similarity = self_similarity,

@@ -7,4 +7,4 @@ scipy
 setuptools
 seaborn
 # plotly, nbformat only required for demo
-rfgap @ git+https://github.com/jakerhodes/RF-GAP-Python
+forestkernel @ git+https://github.com/jakerhodes/RF-GAP-Python@forestkernel-wip

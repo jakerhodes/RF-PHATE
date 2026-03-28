@@ -1,6 +1,6 @@
 from .rfphate import RFPHATE
 from .rfphate import PageRankPHATE
-import rfgap
+import forestkernel
 from rfphate.dataprep import dataprep
 from rfphate.load_data import load_data
 
