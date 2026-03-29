@@ -56,7 +56,7 @@ def RFPHATE(
     prediction_type=None,
     y=None,
     n_components=2,
-    prox_method="gap",
+    kernel_method="gap",
     model_type="rf",
     matrix_type="sparse",
     n_landmark=2000,
@@ -83,12 +83,12 @@ def RFPHATE(
     n_components : int
         The number of dimensions for the RF-PHATE embedding
 
-    prox_method : str
-        The type of proximity to be constructed. Options are 'original', 'oob',
-        and 'rfgap' (default is 'rfgap', highly recommended)
+    kernel_method : str
+        The type of kernel to be constructed. Options are 'original', 'oob',
+        and 'gap' (default is 'gap', highly recommended)
 
     matrix_type : str
-        Whether the proximity type should be 'sparse' or 'dense'
+        Whether the kernel type should be 'sparse' or 'dense'
         (default is sparse)
 
     model_type : str
@@ -140,7 +140,7 @@ def RFPHATE(
         If `True` or `> 0`, print status messages (default is 0)
 
     force_nonzero_diag : bool
-        Whether to force the diagonal of the proximity matrix to be nonzero.
+        Whether to force the diagonal of the kernel matrix to be nonzero.
         (default is True)
 
     force_symmetric : str or None
@@ -158,12 +158,12 @@ def RFPHATE(
         If 1, teleporting is not used.
 
     self_similarity : bool
-        Only used if prox_method == 'rfgap'. All points are passed down as if
+        Only used if kernel_method == 'gap'. All points are passed down as if
         OOB. Increases similarity between an observation and itself as well as
         other points of the same class. NOTE: This partially disrupts the
         geometry learned by the RF-GAP proximities, but can be useful for
-        exploring particularly noisy data. If True, self.prox_extend is
-        employed to the training data rather than self.get_proximities.
+        exploring particularly noisy data. If True, self.kernel_extend is
+        employed to the training data rather than self.get_kernel.
     """
 
     if prediction_type is None and y is None:
@@ -172,7 +172,7 @@ def RFPHATE(
     forest = ForestKernel(
         prediction_type=prediction_type,
         y=y,
-        prox_method=prox_method,
+        kernel_method=kernel_method,
         model_type=model_type,
         **kwargs,
     )
@@ -181,7 +181,7 @@ def RFPHATE(
         def __init__(
             self,
             n_components=n_components,
-            prox_method=prox_method,
+            kernel_method=kernel_method,
             matrix_type=matrix_type,
             n_landmark=n_landmark,
             t=t,
@@ -218,7 +218,7 @@ def RFPHATE(
             self.embedding = None
             self.x = None
             self.optimal_t = None
-            self.prox_method = prox_method
+            self.kernel_method = kernel_method
             self.matrix_type = matrix_type
             self.verbose = verbose
             self.force_nonzero_diag = force_nonzero_diag
@@ -245,18 +245,18 @@ def RFPHATE(
             )
 
         def _get_training_proximity(self, x):
-            """Build the proximity matrix used by PHATE.
+            """Build the kernel matrix used by PHATE.
 
             This preserves the exact behavior of the original implementation.
             """
             if self.self_similarity:
-                proximity = self.prox_extend(x)
+                kernel = self.kernel_extend(x)
                 if self.force_symmetric and self.kernel_symm is None:
-                    self.kernel_symm = "+"  # If force_symmetric but kernel_symm is None, force symmetrize through PHATE because prox_extend may not be symmetric
+                    self.kernel_symm = "+"  # If force_symmetric but kernel_symm is None, force symmetrize through PHATE because kernel_extend may not be symmetric
             else:
-                proximity = self.get_proximities()
+                kernel = self.get_kernel()
 
-            return proximity
+            return kernel
 
         def _make_phate_operator(self):
             """Instantiate the PageRankPHATE operator."""
@@ -297,7 +297,7 @@ def RFPHATE(
             transitions : array-like, [n_samples_y, self.data.shape[0]]
                 Transition matrix from `Y` to `self.data`
             """
-            kernel = self.prox_extend(data)
+            kernel = self.kernel_extend(data)
 
             if isinstance(self.phate_op.graph, graphtools.graphs.LandmarkGraph):
                 clusters = self.phate_op.graph.clusters
@@ -316,7 +316,7 @@ def RFPHATE(
             return pnm
 
         # NOTE: the output of fit(x,y) followed by transform(x) is NOT equivalent
-        # to fit_transform(x,y) because transform() uses prox_extend to build
+        # to fit_transform(x,y) because transform() uses kernel_extend to build
         # extended proximities (even on training points)
         def transform(self, data):
             """Basic linear kernel extension for new points in the embedding space"""
@@ -341,11 +341,11 @@ def RFPHATE(
             """
             self.fit(x, y)
 
-            proximity = self._get_training_proximity(x)
+            kernel = self._get_training_proximity(x)
 
             phate_op = self._make_phate_operator()
             self.phate_op = phate_op
-            self.embedding_ = phate_op.fit_transform(proximity)
+            self.embedding_ = phate_op.fit_transform(kernel)
 
         def fit_transform(self, x, y):
             """Applies _fit_transform to the data, x, y, and returns the
@@ -374,7 +374,7 @@ def RFPHATE(
 
     return RFPHATE(
         n_components=n_components,
-        prox_method=prox_method,
+        kernel_method=kernel_method,
         matrix_type=matrix_type,
         n_landmark=n_landmark,
         t=t,
