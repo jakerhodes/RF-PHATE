@@ -5,7 +5,7 @@ def parse_requirements(filename):
         lines = file.readlines()
         return [line.strip() for line in lines]
     
-with open('README.rst', 'r', encoding='utf-8') as f:
+with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
     
 setup(
@@ -19,7 +19,7 @@ setup(
     install_requires=parse_requirements('requirements.txt'),
     package_data={'rfphate': ['datasets/*.csv']},
     long_description=long_description,
-    long_description_content_type='text/x-rst',
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
