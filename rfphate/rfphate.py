@@ -1,4 +1,4 @@
-from forestkernel import ForestKernel
+from forestgeom import ForestProximity
 from .pagerank_phate import PageRankPHATE
 
 import numpy as np
@@ -7,6 +7,15 @@ import graphtools
 
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import normalize
+from sklearn.utils.multiclass import type_of_target
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    RandomForestRegressor,
+    ExtraTreesClassifier,
+    ExtraTreesRegressor,
+    GradientBoostingClassifier,
+    GradientBoostingRegressor,
+)
 
 
 
@@ -72,7 +81,7 @@ class RFPHATE:
     verbose : int or bool
         If `True` or `> 0`, print status messages (default is 0)
 
-    force_nonzero_diag : bool
+    adjust_diagonal : bool
         Whether to force the diagonal of the kernel matrix to be nonzero.
         (default is True)
 
@@ -129,7 +138,7 @@ class RFPHATE:
         mds="metric",
         random_state=None,
         verbose=0,
-        force_nonzero_diag=True,
+        adjust_diagonal=True,
         force_symmetric=False,
         allow_semi_supervised=False,
         kernel_symm=None,
@@ -143,7 +152,7 @@ class RFPHATE:
         self.kernel_method = kernel_method
         self.model_type = model_type
         self.matrix_type = matrix_type
-        self.force_nonzero_diag = force_nonzero_diag
+        self.adjust_diagonal = adjust_diagonal
         self.force_symmetric = force_symmetric
         self.allow_semi_supervised = allow_semi_supervised
 
@@ -190,20 +199,47 @@ class RFPHATE:
             )
 
     def _make_kernel_model(self, y):
-        """Instantiate the underlying ForestKernel model."""
-        return ForestKernel(
-            prediction_type=self.prediction_type,
-            y=y,
-            kernel_method=self.kernel_method,
-            model_type=self.model_type,
-            matrix_type=self.matrix_type,
-            force_nonzero_diag=self.force_nonzero_diag,
-            force_symmetric=self.force_symmetric,
-            allow_semi_supervised=self.allow_semi_supervised,
-            random_state=self.random_state,
-            verbose=self.verbose,
-            **self.forest_kwargs,
+        """Instantiate the underlying ForestProximity model around a forest.
+
+        This builds a base ensemble estimator according to `model_type` and
+        `prediction_type` (or infers it from `y`), then wraps it with
+        `ForestProximity` using the selected kernel/weight scheme.
+        """
+        # Determine prediction type if not provided
+        pred_type = self.prediction_type
+        if pred_type is None:
+            try:
+                t = type_of_target(y)
+                if t in ("binary", "multiclass", "multilabel-indicator"):
+                    pred_type = "classification"
+                else:
+                    pred_type = "regression"
+            except Exception:
+                pred_type = "regression"
+
+        # Choose estimator class
+        is_classification = str(pred_type).lower().startswith("class")
+
+        model_type = (self.model_type or "rf").lower()
+        if model_type == "rf":
+            Est = RandomForestClassifier if is_classification else RandomForestRegressor
+        elif model_type == "et":
+            Est = ExtraTreesClassifier if is_classification else ExtraTreesRegressor
+        elif model_type in ("gbt", "gb", "gbrt"):
+            Est = GradientBoostingClassifier if is_classification else GradientBoostingRegressor
+        else:
+            # Fallback to random forest
+            Est = RandomForestClassifier if is_classification else RandomForestRegressor
+
+        # Build forest estimator with provided kwargs
+        forest = Est(random_state=self.random_state, **self.forest_kwargs)
+
+        # Map old kernel_method names to ForestProximity weight_scheme
+        weight_scheme = (
+            "uniform" if self.kernel_method == "original" else self.kernel_method
         )
+
+        return ForestProximity(forest=forest, weight_scheme=weight_scheme)
 
     def _make_phate_operator(self, kernel_symm):
         """Instantiate the PageRankPHATE operator."""
@@ -242,16 +278,25 @@ class RFPHATE:
 
         This preserves the exact behavior of the original implementation.
         """
+        # Return dense if requested
+        return_dense = self.matrix_type != "sparse"
+
         if self.self_similarity:
-            kernel = self.kernel_model_.kernel_extend(x)
+            # Treat training points as out-of-sample (preserves self-sim behavior)
+            kernel = self.kernel_model_.transform(x, return_dense=return_dense)
             kernel_symm = self.kernel_symm
             if self.force_symmetric and kernel_symm is None:
                 # If force_symmetric but kernel_symm is None, force
-                # symmetrization through PHATE because kernel_extend may not
+                # symmetrization through PHATE because transform may not
                 # be symmetric
                 kernel_symm = "+"
         else:
-            kernel = self.kernel_model_.get_kernel()
+            # Use the trained training-proximity matrix
+            kernel = self.kernel_model_.training_proximity(
+                force_symmetric=self.force_symmetric,
+                adjust_diagonal=self.adjust_diagonal,
+                return_dense=return_dense,
+            )
             kernel_symm = self.kernel_symm
 
         return kernel, kernel_symm
@@ -340,7 +385,7 @@ class RFPHATE:
         """
         self._check_is_fitted()
 
-        kernel = self.kernel_model_.kernel_extend(data)
+        kernel = self.kernel_model_.transform(data, return_dense=(self.matrix_type != "sparse"))
 
         if isinstance(self.phate_op_.graph, graphtools.graphs.LandmarkGraph):
             clusters = self.phate_op_.graph.clusters

@@ -2,10 +2,10 @@ graphtools
 numpy
 pandas
 phate
+forestgeom
 scikit_learn
 scipy
 setuptools
 seaborn
 plotly #only required for demo
 nbformat #only required for demo
-forestkernel @ git+https://github.com/jakerhodes/RF-GAP-Python@forestkernel-wip

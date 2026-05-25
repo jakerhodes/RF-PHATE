@@ -3,7 +3,7 @@ from sklearn.model_selection import KFold
 from sklearn.base import clone
 import numpy as np
 import pandas as pd
-from forestkernel import ForestKernel
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from joblib import Parallel, delayed
 
 def is_continuous(y: np.ndarray) -> bool:
@@ -57,7 +57,12 @@ def model_embedding_diff(
         model = KNeighborsRegressor if is_continuous(y) else KNeighborsClassifier
     model = model(**(model_kwargs or {}))
 
-    rf_model = ForestKernel(y = y, oob_score = True, random_state = random_state)
+    # Use a standard sklearn random forest for predictive comparisons
+    rf_model = (
+        RandomForestRegressor(random_state=random_state)
+        if is_continuous(y)
+        else RandomForestClassifier(random_state=random_state)
+    )
 
     # Precompute cross-validation splits to avoid redundant computation
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
