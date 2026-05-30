@@ -37,9 +37,8 @@ Important API points:
   `"regression"` to set it explicitly.
 - `model_type` selects the base ensemble: `"rf"` for random forests, `"et"` for
   extra trees, and `"gbt"` for gradient boosted trees.
-- `kernel_method` maps to the `forestgeom` proximity weighting scheme. The
-  default is `"gap"`; `"original"` is mapped to the `forestgeom` `"uniform"`
-  scheme.
+- `kernel_method` is passed to the `forestgeom` proximity weighting scheme.
+  The default is `"gap"`; use `"uniform"` for unweighted forest proximity.
 - `forest_kwargs` are passed to the underlying scikit-learn ensemble.
 - `phate_kwargs` are passed to `PageRankPHATE`.
 - `transform(data)` embeds new observations using the fitted forest proximity
