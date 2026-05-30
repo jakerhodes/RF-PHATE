@@ -1,7 +1,7 @@
 # RF-PHATE
 
 RF-PHATE creates supervised, low-dimensional embeddings from forest proximity
-kernels and a PageRank PHATE operator. It is designed for exploratory data
+matrices and a PageRank PHATE operator. It is designed for exploratory data
 analysis when the target variable should guide the geometry of the embedding.
 
 The current implementation builds proximities with
