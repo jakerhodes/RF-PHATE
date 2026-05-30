@@ -33,8 +33,8 @@ wraps it in `ForestProximity`, and passes the resulting proximity matrix to
 
 Important API points:
 
-- `prediction_type` is inferred from `y` by default. Use `"classification"` or
-  `"regression"` to set it explicitly.
+- `prediction_type` selects the estimator family. Use `"classification"` or
+  `"regression"`.
 - `model_type` selects the base ensemble: `"rf"` for random forests, `"et"` for
   extra trees, and `"gbt"` for gradient boosted trees.
 - `kernel_method` is passed to the `forestgeom` proximity weighting scheme.

@@ -7,7 +7,6 @@ import graphtools
 
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import normalize
-from sklearn.utils.multiclass import type_of_target
 from sklearn.ensemble import (
     RandomForestClassifier,
     RandomForestRegressor,
@@ -25,25 +24,21 @@ class RFPHATE:
 
     Parameters
     ----------
-    prediction_type : str or None
-        Prediction type passed to ForestKernel. If None, ForestKernel infers it
-        from the target values y at fit time.
+    prediction_type : {'classification', 'regression'}
+        Prediction type used to choose the underlying forest estimator.
+        Default is 'classification'.
 
     n_components : int
         The number of dimensions for the RF-PHATE embedding
 
     kernel_method : str
-        The type of kernel to be constructed. Options are 'original', 'oob',
+        The type of kernel to be constructed. Options are 'uniform', 'oob',
         and 'gap' (default is 'gap', highly recommended)
 
     model_type : str
-        Base forest model to use for generating kernels.
+        Base forest model to use for generating proximities.
         Options include 'rf' for Random Forests, 'et' for ExtraTrees, and 'gbt'
         for Gradient Boosted Trees (default is 'rf')
-
-    matrix_type : str
-        Whether the kernel type should be 'sparse' or 'dense'
-        (default is sparse)
 
     n_landmark : int, optional
         number of landmarks to use in fast PHATE (default is 2000)
@@ -88,14 +83,6 @@ class RFPHATE:
     force_symmetric : bool
         Force symmetry of the kernel matrix. (default is False)
 
-    allow_semi_supervised : bool
-        Whether to allow semi-supervised learning in the underlying forest
-        kernel matrix building (kernels between both labeled and unlabeled
-        points). Semi-supervised mode is detected by the ForestKernel class by
-        checking for the presence of unlabeled points during fit
-        (e.g. label == -1 or NaN), depending on the prediction type.
-        (default is False)
-
     kernel_symm : str, optional
         Selects which kernel symmetrization method is used for building the
         underlying PHATE diffusion operator.
@@ -111,12 +98,12 @@ class RFPHATE:
         Only used if kernel_method == 'gap'. All points are passed down as if
         OOB. Increases similarity between an observation and itself as well as
         other points of the same class. NOTE: This partially disrupts the
-        geometry learned by the RF-GAP kernels, but can be useful for
-        exploring particularly noisy data. If True, kernel_extend is employed
-        on the training data rather than get_kernel.
+        geometry learned by the RF-GAP proximities, but can be useful for
+        exploring particularly noisy data. If True, ForestProximity.transform
+        is employed on the training data rather than training_proximity.
 
     forest_kwargs : dict or None
-        Extra keyword arguments passed only to ForestKernel / the underlying
+        Extra keyword arguments passed only to ForestProximity / the underlying
         ensemble constructor.
 
     phate_kwargs : dict or None
@@ -125,11 +112,10 @@ class RFPHATE:
 
     def __init__(
         self,
-        prediction_type=None,
+        prediction_type="classification",
         n_components=2,
         kernel_method="gap",
         model_type="rf",
-        matrix_type="sparse",
         n_landmark=2000,
         t="auto",
         n_pca=100,
@@ -140,21 +126,18 @@ class RFPHATE:
         verbose=0,
         adjust_diagonal=True,
         force_symmetric=False,
-        allow_semi_supervised=False,
         kernel_symm=None,
         beta=0.9,
         self_similarity=False,
         forest_kwargs=None,
         phate_kwargs=None,
     ):
-        # Forest-kernel parameters
+        # Forest-proximity parameters
         self.prediction_type = prediction_type
         self.kernel_method = kernel_method
         self.model_type = model_type
-        self.matrix_type = matrix_type
         self.adjust_diagonal = adjust_diagonal
         self.force_symmetric = force_symmetric
-        self.allow_semi_supervised = allow_semi_supervised
 
         # PHATE parameters
         self.n_components = n_components
@@ -178,16 +161,11 @@ class RFPHATE:
         self.phate_kwargs = {} if phate_kwargs is None else dict(phate_kwargs)
 
         # Learned objects
-        self.kernel_model_ = None
+        self.proximity_model_ = None
         self.phate_op_ = None
 
-    @property
-    def embedding_(self):
-        self._check_is_fitted()
-        return self.phate_op_.embedding
-
     def _check_is_fitted(self):
-        if self.kernel_model_ is None or self.phate_op_ is None:
+        if self.proximity_model_ is None or self.phate_op_ is None:
             raise NotFittedError(
                 "This RFPHATE instance is not fitted yet. "
                 "Call 'fit' or 'fit_transform' first."
@@ -198,48 +176,47 @@ class RFPHATE:
                 "Call 'fit' or 'fit_transform' first."
             )
 
-    def _make_kernel_model(self, y):
+    def _make_proximity_model(self):
         """Instantiate the underlying ForestProximity model around a forest.
 
         This builds a base ensemble estimator according to `model_type` and
-        `prediction_type` (or infers it from `y`), then wraps it with
-        `ForestProximity` using the selected kernel/weight scheme.
+        `prediction_type`, then wraps it with `ForestProximity` using the
+        selected proximity weight scheme.
         """
-        # Determine prediction type if not provided
-        pred_type = self.prediction_type
-        if pred_type is None:
-            try:
-                t = type_of_target(y)
-                if t in ("binary", "multiclass", "multilabel-indicator"):
-                    pred_type = "classification"
-                else:
-                    pred_type = "regression"
-            except Exception:
-                pred_type = "regression"
+        if self.prediction_type not in ("classification", "regression"):
+            raise ValueError(
+                f"Invalid prediction_type '{self.prediction_type}'. "
+                "Choose 'classification' or 'regression'."
+            )
 
-        # Choose estimator class
-        is_classification = str(pred_type).lower().startswith("class")
-
-        model_type = (self.model_type or "rf").lower()
-        if model_type == "rf":
-            Est = RandomForestClassifier if is_classification else RandomForestRegressor
-        elif model_type == "et":
-            Est = ExtraTreesClassifier if is_classification else ExtraTreesRegressor
-        elif model_type in ("gbt", "gb", "gbrt"):
-            Est = GradientBoostingClassifier if is_classification else GradientBoostingRegressor
+        if self.model_type == "rf":
+            Est = (
+                RandomForestClassifier
+                if self.prediction_type == "classification"
+                else RandomForestRegressor
+            )
+        elif self.model_type == "et":
+            Est = (
+                ExtraTreesClassifier
+                if self.prediction_type == "classification"
+                else ExtraTreesRegressor
+            )
+        elif self.model_type == "gbt":
+            Est = (
+                GradientBoostingClassifier
+                if self.prediction_type == "classification"
+                else GradientBoostingRegressor
+            )
         else:
-            # Fallback to random forest
-            Est = RandomForestClassifier if is_classification else RandomForestRegressor
+            raise ValueError(
+                f"Invalid model_type '{self.model_type}'. "
+                "Choose from 'rf', 'et', or 'gbt'."
+            )
 
         # Build forest estimator with provided kwargs
         forest = Est(random_state=self.random_state, **self.forest_kwargs)
 
-        # Map old kernel_method names to ForestProximity weight_scheme
-        weight_scheme = (
-            "uniform" if self.kernel_method == "original" else self.kernel_method
-        )
-
-        return ForestProximity(forest=forest, weight_scheme=weight_scheme)
+        return ForestProximity(forest=forest, weight_scheme=self.kernel_method)
 
     def _make_phate_operator(self, kernel_symm):
         """Instantiate the PageRankPHATE operator."""
@@ -276,14 +253,11 @@ class RFPHATE:
     def _get_training_kernel(self, x):
         """Build the kernel matrix used by PHATE.
 
-        This preserves the exact behavior of the original implementation.
+        This preserves the exact behavior of the previous implementation.
         """
-        # Return dense if requested
-        return_dense = self.matrix_type != "sparse"
-
         if self.self_similarity:
             # Treat training points as out-of-sample (preserves self-sim behavior)
-            kernel = self.kernel_model_.transform(x, return_dense=return_dense)
+            kernel = self.proximity_model_.transform(x)
             kernel_symm = self.kernel_symm
             if self.force_symmetric and kernel_symm is None:
                 # If force_symmetric but kernel_symm is None, force
@@ -292,17 +266,34 @@ class RFPHATE:
                 kernel_symm = "+"
         else:
             # Use the trained training-proximity matrix
-            kernel = self.kernel_model_.training_proximity(
+            kernel = self.proximity_model_.training_proximity(
                 force_symmetric=self.force_symmetric,
                 adjust_diagonal=self.adjust_diagonal,
-                return_dense=return_dense,
             )
             kernel_symm = self.kernel_symm
 
         return kernel, kernel_symm
 
+    def _fit_phate(self, x, y):
+        # ---------------------------------------------------------
+        # STEP 1: fit forest proximity model
+        # ---------------------------------------------------------
+        self.proximity_model_ = self._make_proximity_model()
+        self.proximity_model_.fit(x, y)
+
+        # ---------------------------------------------------------
+        # STEP 2: build training kernel for PHATE
+        # ---------------------------------------------------------
+        kernel, kernel_symm = self._get_training_kernel(x)
+
+        # ---------------------------------------------------------
+        # STEP 3: fit PHATE on the kernel
+        # ---------------------------------------------------------
+        self.phate_op_ = self._make_phate_operator(kernel_symm)
+        return self.phate_op_.fit_transform(kernel)
+
     def fit(self, x, y):
-        """Fit the forest kernel model and the PHATE operator.
+        """Fit the forest proximity model and the PHATE operator.
 
         Parameters
         ----------
@@ -319,23 +310,7 @@ class RFPHATE:
         self : RFPHATE
             Fitted estimator.
         """
-
-        # ---------------------------------------------------------
-        # STEP 1: fit forest kernel model
-        # ---------------------------------------------------------
-        self.kernel_model_ = self._make_kernel_model(y)
-        self.kernel_model_.fit(x, y)
-
-        # ---------------------------------------------------------
-        # STEP 2: build training kernel for PHATE
-        # ---------------------------------------------------------
-        kernel, kernel_symm = self._get_training_kernel(x)
-
-        # ---------------------------------------------------------
-        # STEP 3: fit PHATE on the kernel
-        # ---------------------------------------------------------
-        self.phate_op_ = self._make_phate_operator(kernel_symm)
-        self.phate_op_.fit_transform(kernel)
+        self._fit_phate(x, y)
 
         return self
 
@@ -357,8 +332,7 @@ class RFPHATE:
             A lower-dimensional representation of the data following the
             RF-PHATE algorithm.
         """
-        self.fit(x, y)
-        return self.embedding_
+        return self._fit_phate(x, y)
 
     def extend_to_data(self, data):
         """Build transition matrix from new data to the training graph
@@ -385,7 +359,7 @@ class RFPHATE:
         """
         self._check_is_fitted()
 
-        kernel = self.kernel_model_.transform(data, return_dense=(self.matrix_type != "sparse"))
+        kernel = self.proximity_model_.transform(data)
 
         if isinstance(self.phate_op_.graph, graphtools.graphs.LandmarkGraph):
             clusters = self.phate_op_.graph.clusters
@@ -400,8 +374,8 @@ class RFPHATE:
         return pnm
 
     # NOTE: the output of fit(x, y) followed by transform(x) is NOT equivalent
-    # to fit_transform(x, y) because transform() uses kernel_extend to build
-    # extended kernels (even on training points)
+    # to fit_transform(x, y) because transform() uses proximity extension
+    # to build extended proximity blocks (even on training points)
     def transform(self, data):
         """Basic linear kernel extension for new points in the embedding space.
 
@@ -417,4 +391,4 @@ class RFPHATE:
         """
         self._check_is_fitted()
         pnm = self.extend_to_data(data)
-        return self.phate_op_.graph.interpolate(self.embedding_, pnm)
+        return self.phate_op_.graph.interpolate(self.phate_op_.embedding, pnm)

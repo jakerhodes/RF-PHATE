@@ -20,7 +20,7 @@ def evaluate_fold(model, rf_model, x, y, embedding, train_idx, test_idx):
     knn = clone(model)
     rf = clone(rf_model)
 
-    # KNN on original data
+    # KNN on input data
     knn.fit(x_train, y_train)
     knn_score_x = knn.score(x_test, y_test)
 
@@ -28,11 +28,11 @@ def evaluate_fold(model, rf_model, x, y, embedding, train_idx, test_idx):
     knn.fit(emb_train, y_train)
     knn_score_emb = knn.score(emb_test, y_test)
 
-    # ForestKernel on original data
+    # Random forest on input data
     rf.fit(x_train, y_train)
     rf_score_x = rf.score(x_test, y_test)
 
-    # ForestKernel on embedding
+    # Random forest on embedding
     rf.fit(emb_train, y_train)
     rf_score_emb = rf.score(emb_test, y_test)
 
@@ -50,7 +50,7 @@ def model_embedding_diff(
     n_jobs: int = 1,
     **kwargs
 ) -> dict:
-    """Evaluate KNN and RFGAP models on original and embedded data."""
+    """Evaluate KNN and RFGAP models on input and embedded data."""
     
     # Determine model type
     if model is None:
