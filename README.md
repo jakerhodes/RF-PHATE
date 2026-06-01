@@ -5,7 +5,7 @@ matrices and a PageRank PHATE operator. It is designed for exploratory data
 analysis when the target variable should guide the geometry of the embedding.
 
 The current implementation builds proximities with
-[`forestgeom`](https://github.com/jakerhodes/forestgeom) `ForestProximity`
+[`forestgeom`](https://github.com/JakeSRhodesLab/forestgeom) `ForestProximity`
 objects, using scikit-learn forest estimators under the hood.
 
 A repository with scripts to replicate the main quantification comparisons from
