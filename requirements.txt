@@ -3,7 +3,7 @@ numpy
 pandas
 phate
 forestgeom
-scikit_learn
+scikit-learn
 scipy
 setuptools
 seaborn
