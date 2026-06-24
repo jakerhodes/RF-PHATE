@@ -39,27 +39,43 @@ Important API points:
   extra trees, and `"gbt"` for gradient boosted trees.
 - `kernel_method` is passed to the `forestgeom` proximity weighting scheme.
   The default is `"gap"`; use `"uniform"` for unweighted forest proximity.
-- `forest_kwargs` are passed to the underlying scikit-learn ensemble.
-- `phate_kwargs` are passed to `PageRankPHATE`.
+- `random_state`, `verbose`, and `n_jobs` are explicit RF-PHATE parameters and
+  are passed through to both the forest estimator and `PageRankPHATE` where
+  supported. scikit-learn gradient boosting estimators do not support `n_jobs`.
+- `forest_params` are passed to the underlying scikit-learn ensemble.
+- `proximity_params` are passed to `forestgeom.ForestProximity`.
+- `phate_params` are passed to `PageRankPHATE`.
 - `transform(data)` embeds new observations using the fitted forest proximity
   model and PHATE graph interpolation.
 
 ## Quick Demo
 
 ```python
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import rfphate
+
+Path("figures").mkdir(exist_ok=True)
 
 data = rfphate.load_data("titanic")
 x, y = rfphate.dataprep(data)
 
 rfphate_op = rfphate.RFPHATE(
     random_state=42,
+    n_jobs=-1,
+    verbose=1,
     kernel_method="gap",
     model_type="rf",
     force_symmetric=True,
     adjust_diagonal=True,
+    forest_params={
+        "n_estimators": 100,
+    },
+    phate_params={
+        "mds_solver": "sgd",
+    },
 )
 
 emb = rfphate_op.fit_transform(x, y)
@@ -73,7 +89,8 @@ plot_data = data.assign(
 )
 ```
 
-Color the embedding by passenger class and use marker style for survival:
+Color the embedding by passenger class and use marker style for survival. The
+saved PNG uses the same `plot_data` coordinates built from `emb` above:
 
 ```python
 plt.figure(figsize=(7, 5.5), dpi=150)
@@ -90,12 +107,14 @@ plot = sns.scatterplot(
 plot.set_title("RF-PHATE Embedding Colored by Pclass")
 plot.set_xlabel("RF-PHATE 1")
 plot.set_ylabel("RF-PHATE 2")
+plt.savefig("figures/titanic_pclass.png", bbox_inches="tight")
 plt.show()
 ```
 
 ![Titanic passenger class embedding](figures/titanic_pclass.png)
 
-Color the same embedding by passenger sex:
+Color the same embedding by passenger sex. The saved PNG uses the same
+`plot_data` coordinates built from `emb` above:
 
 ```python
 plt.figure(figsize=(7, 5.5), dpi=150)
@@ -112,6 +131,7 @@ plot = sns.scatterplot(
 plot.set_title("RF-PHATE Embedding Colored by Sex")
 plot.set_xlabel("RF-PHATE 1")
 plot.set_ylabel("RF-PHATE 2")
+plt.savefig("figures/titanic_sex.png", bbox_inches="tight")
 plt.show()
 ```
 
@@ -131,6 +151,8 @@ x_train, x_test, y_train, y_test = train_test_split(
 
 rfphate_split_op = rfphate.RFPHATE(
     random_state=42,
+    n_jobs=-1,
+    verbose=1,
     kernel_method="gap",
     model_type="rf",
     force_symmetric=True,

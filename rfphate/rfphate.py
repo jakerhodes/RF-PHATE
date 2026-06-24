@@ -17,6 +17,18 @@ from sklearn.ensemble import (
 )
 
 
+_FOREST_ESTIMATORS = {
+    ("classification", "rf"): RandomForestClassifier,
+    ("regression", "rf"): RandomForestRegressor,
+    ("classification", "et"): ExtraTreesClassifier,
+    ("regression", "et"): ExtraTreesRegressor,
+    ("classification", "gbt"): GradientBoostingClassifier,
+    ("regression", "gbt"): GradientBoostingRegressor,
+}
+
+
+_FOREST_MODELS_WITH_N_JOBS = {"rf", "et"}
+
 
 class RFPHATE:
     """An RF-PHATE class which is used to fit a random forest, generate
@@ -49,32 +61,16 @@ class RFPHATE:
         according to the knee point in the Von Neumann Entropy of
         the diffusion operator (default is 'auto')
 
-    n_pca : int, optional
-        Number of principal components to use for calculating
-        neighborhoods. For extremely large datasets, using
-        n_pca < 20 allows neighborhoods to be calculated in
-        roughly log(n_samples) time (default is 100)
-
-    mds : string, optional
-        choose from ['classic', 'metric', 'nonmetric'].
-        Selects which MDS algorithm is used for dimensionality reduction
-        (default is 'metric')
-
-    mds_solver : {'sgd', 'smacof'}
-        which solver to use for metric MDS. SGD is substantially faster
-        but produces slightly less optimal results (default is 'sgd')
-
-    mds_dist : string, optional
-        Distance metric for MDS. Recommended values: 'euclidean' and 'cosine'
-        Any metric from `scipy.spatial.distance` can be used. Custom distance
-        functions of form `f(x, y) = d` are also accepted
-        (default is 'euclidean')
-
     random_state : integer
         random seed state set for RF and MDS
 
+    n_jobs : int
+        Number of jobs to use where supported by the underlying forest and
+        PHATE operators. Random forests and ExtraTrees support this directly;
+        GradientBoosting estimators do not. (default is 1)
+
     verbose : int or bool
-        If `True` or `> 0`, print status messages (default is 0)
+        If `True` or `> 0`, print status messages (default is 1)
 
     adjust_diagonal : bool
         Whether to force the diagonal of the kernel matrix to be nonzero.
@@ -102,35 +98,43 @@ class RFPHATE:
         exploring particularly noisy data. If True, ForestProximity.transform
         is employed on the training data rather than training_proximity.
 
-    forest_kwargs : dict or None
-        Extra keyword arguments passed only to ForestProximity / the underlying
-        ensemble constructor.
+    forest_params : dict or None
+        Extra keyword arguments passed to the underlying scikit-learn ensemble
+        constructor. The random_state and verbose arguments are controlled by
+        RFPHATE and take precedence. The n_jobs argument is also controlled by
+        RFPHATE for estimators that support it.
 
-    phate_kwargs : dict or None
-        Extra keyword arguments passed only to PageRankPHATE.
+    proximity_params : dict or None
+        Extra keyword arguments passed to ForestProximity. The forest and
+        weight_scheme arguments are controlled by RFPHATE and take precedence.
+
+    phate_params : dict or None
+        Extra keyword arguments passed to PageRankPHATE. Parameters controlled
+        directly by RFPHATE, such as n_components, t, n_landmark, knn_dist,
+        n_jobs, random_state, verbose, beta, and kernel_symm, take precedence.
     """
 
     def __init__(
         self,
         prediction_type="classification",
-        n_components=2,
-        kernel_method="gap",
         model_type="rf",
-        n_landmark=2000,
+        kernel_method="gap",
+        n_components=2,
         t="auto",
-        n_pca=100,
-        mds_solver="sgd",
-        mds_dist="euclidean",
-        mds="metric",
-        random_state=None,
-        verbose=0,
-        adjust_diagonal=True,
-        force_symmetric=False,
-        kernel_symm=None,
+        n_landmark=2000,
         beta=0.9,
+        n_jobs=1,
+        random_state=None,
+        verbose=1,
         self_similarity=False,
-        forest_kwargs=None,
-        phate_kwargs=None,
+        force_symmetric=False,
+        adjust_diagonal=True,
+        kernel_symm=None,
+
+        # Explicit extra kwargs routing for underlying objects
+        forest_params=None,
+        proximity_params=None,
+        phate_params=None,
     ):
         # Forest-proximity parameters
         self.prediction_type = prediction_type
@@ -143,12 +147,8 @@ class RFPHATE:
         self.n_components = n_components
         self.t = t
         self.n_landmark = n_landmark
-        self.n_pca = n_pca
-        self.mds = mds
-        self.knn_dist = "precomputed_affinity"
         self.kernel_symm = kernel_symm
-        self.mds_dist = mds_dist
-        self.mds_solver = mds_solver
+        self.n_jobs = n_jobs
         self.random_state = random_state
         self.verbose = verbose
         self.beta = beta
@@ -157,8 +157,9 @@ class RFPHATE:
         self.self_similarity = self_similarity
 
         # Explicit kwargs routing
-        self.forest_kwargs = {} if forest_kwargs is None else dict(forest_kwargs)
-        self.phate_kwargs = {} if phate_kwargs is None else dict(phate_kwargs)
+        self.forest_params = dict(forest_params or {})
+        self.proximity_params = dict(proximity_params or {})
+        self.phate_params = dict(phate_params or {})
 
         # Learned objects
         self.proximity_model_ = None
@@ -176,6 +177,29 @@ class RFPHATE:
                 "Call 'fit' or 'fit_transform' first."
             )
 
+    def _make_forest(self):
+        """Instantiate the configured scikit-learn forest estimator."""
+        key = (self.prediction_type, self.model_type)
+        if key not in _FOREST_ESTIMATORS:
+            raise ValueError(
+                "Invalid combination of prediction_type and model_type. "
+                "Use prediction_type in {'classification', 'regression'} and "
+                "model_type in {'rf', 'et', 'gbt'}."
+            )
+
+        Estimator = _FOREST_ESTIMATORS[key]
+        forest_params = {
+            **self.forest_params,
+            "random_state": self.random_state,
+            "verbose": self.verbose,
+        }
+        if self.model_type in _FOREST_MODELS_WITH_N_JOBS:
+            forest_params["n_jobs"] = self.n_jobs
+        else:
+            forest_params.pop("n_jobs", None)
+
+        return Estimator(**forest_params)
+
     def _make_proximity_model(self):
         """Instantiate the underlying ForestProximity model around a forest.
 
@@ -183,58 +207,30 @@ class RFPHATE:
         `prediction_type`, then wraps it with `ForestProximity` using the
         selected proximity weight scheme.
         """
-        if self.prediction_type not in ("classification", "regression"):
-            raise ValueError(
-                f"Invalid prediction_type '{self.prediction_type}'. "
-                "Choose 'classification' or 'regression'."
-            )
+        proximity_params = {
+            **self.proximity_params,
+            "forest": self._make_forest(),
+            "weight_scheme": self.kernel_method,
+        }
 
-        if self.model_type == "rf":
-            Est = (
-                RandomForestClassifier
-                if self.prediction_type == "classification"
-                else RandomForestRegressor
-            )
-        elif self.model_type == "et":
-            Est = (
-                ExtraTreesClassifier
-                if self.prediction_type == "classification"
-                else ExtraTreesRegressor
-            )
-        elif self.model_type == "gbt":
-            Est = (
-                GradientBoostingClassifier
-                if self.prediction_type == "classification"
-                else GradientBoostingRegressor
-            )
-        else:
-            raise ValueError(
-                f"Invalid model_type '{self.model_type}'. "
-                "Choose from 'rf', 'et', or 'gbt'."
-            )
-
-        # Build forest estimator with provided kwargs
-        forest = Est(random_state=self.random_state, **self.forest_kwargs)
-
-        return ForestProximity(forest=forest, weight_scheme=self.kernel_method)
+        return ForestProximity(**proximity_params)
 
     def _make_phate_operator(self, kernel_symm):
         """Instantiate the PageRankPHATE operator."""
-        return PageRankPHATE(
-            n_components=self.n_components,
-            t=self.t,
-            n_landmark=self.n_landmark,
-            kernel_symm=kernel_symm,
-            mds=self.mds,
-            n_pca=self.n_pca,
-            knn_dist=self.knn_dist,
-            mds_dist=self.mds_dist,
-            mds_solver=self.mds_solver,
-            random_state=self.random_state,
-            verbose=self.verbose,
-            beta=self.beta,
-            **self.phate_kwargs,
-        )
+        phate_params = {
+            **self.phate_params,
+            "n_components": self.n_components,
+            "t": self.t,
+            "n_landmark": self.n_landmark,
+            "knn_dist": "precomputed_affinity",
+            "n_jobs": self.n_jobs,
+            "random_state": self.random_state,
+            "verbose": self.verbose,
+            "beta": self.beta,
+            "kernel_symm": kernel_symm,
+        }
+
+        return PageRankPHATE(**phate_params)
 
     def _build_cluster_map(self, clusters, n_train_points):
         """Build sparse map from training points to active landmark ids."""
