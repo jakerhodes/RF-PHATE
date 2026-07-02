@@ -171,11 +171,6 @@ class RFPHATE:
                 "This RFPHATE instance is not fitted yet. "
                 "Call 'fit' or 'fit_transform' first."
             )
-        if getattr(self.phate_op_, "embedding", None) is None:
-            raise NotFittedError(
-                "The PHATE operator is missing its fitted embedding. "
-                "Call 'fit' or 'fit_transform' first."
-            )
 
     def _make_forest(self):
         """Instantiate the configured scikit-learn forest estimator."""
@@ -286,7 +281,8 @@ class RFPHATE:
         # STEP 3: fit PHATE on the kernel
         # ---------------------------------------------------------
         self.phate_op_ = self._make_phate_operator(kernel_symm)
-        return self.phate_op_.fit_transform(kernel)
+        self.phate_op_.fit(kernel)
+        return self
 
     def fit(self, x, y):
         """Fit the forest proximity model and the PHATE operator.
@@ -328,21 +324,22 @@ class RFPHATE:
             A lower-dimensional representation of the data following the
             RF-PHATE algorithm.
         """
-        return self._fit_phate(x, y)
+        self.fit(x, y)
+        return self.transform()
 
-    def extend_to_data(self, data):
+    def extend_to_data(self, X):
         """Build transition matrix from new data to the training graph
         (full or landmark).
 
-        Creates a transition matrix such that `data` can be approximated by
+        Creates a transition matrix such that `X` can be approximated by
         a linear combination of landmarks. Any transformation of the
-        landmarks can be trivially applied to `data` by performing
+        landmarks can be trivially applied to `X` by performing
 
             transform_data = transitions.dot(transform)
 
         Parameters
         ----------
-        data : array-like, shape (n_samples_new, n_features)
+        X : array-like, shape (n_samples_new, n_features)
             New data for which a kernel block is calculated to the training
             data. `n_features` must match the ambient dimension of the fitted
             model.
@@ -350,12 +347,12 @@ class RFPHATE:
         Returns
         -------
         transitions : array-like, shape (n_samples_new, n_train_samples)
-            Transition matrix from `data` to the training graph, or to the
+            Transition matrix from `X` to the training graph, or to the
             active landmarks in landmark PHATE mode.
         """
         self._check_is_fitted()
 
-        kernel = self.proximity_model_.transform(data)
+        kernel = self.proximity_model_.transform(X)
 
         if isinstance(self.phate_op_.graph, graphtools.graphs.LandmarkGraph):
             clusters = self.phate_op_.graph.clusters
@@ -372,19 +369,29 @@ class RFPHATE:
     # NOTE: the output of fit(x, y) followed by transform(x) is NOT equivalent
     # to fit_transform(x, y) because transform() uses proximity extension
     # to build extended proximity blocks (even on training points)
-    def transform(self, data):
-        """Basic linear kernel extension for new points in the embedding space.
+    def transform(self, X=None):
+        """Project data into the fitted RF-PHATE embedding.
 
         Parameters
         ----------
-        data : array-like, shape (n_samples_new, n_features)
+        X : array-like, shape (n_samples_new, n_features), optional
             New data to project into the fitted RF-PHATE embedding.
+            If None, return the training embedding.
 
         Returns
         -------
-        array-like, shape (n_samples_new, n_components)
-            Embedded coordinates for the new data.
+        array-like, shape (n_samples_new, n_components) or
+        shape (n_samples, n_components)
+            Embedded coordinates for new data, or training coordinates
+            when X is None.
         """
         self._check_is_fitted()
-        pnm = self.extend_to_data(data)
-        return self.phate_op_.graph.interpolate(self.phate_op_.embedding, pnm)
+        if getattr(self.phate_op_, "embedding", None) is None:
+            self.phate_op_.transform()
+        embedding = self.phate_op_.embedding
+
+        if X is None:
+            return embedding
+
+        pnm = self.extend_to_data(X)
+        return self.phate_op_.graph.interpolate(embedding, pnm)
