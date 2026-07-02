@@ -386,12 +386,10 @@ class RFPHATE:
             when X is None.
         """
         self._check_is_fitted()
-        if getattr(self.phate_op_, "embedding", None) is None:
-            self.phate_op_.transform()
-        embedding = self.phate_op_.embedding
 
         if X is None:
-            return embedding
+            return self.phate_op_.transform()
 
+        self.phate_op_.transform()
         pnm = self.extend_to_data(X)
-        return self.phate_op_.graph.interpolate(embedding, pnm)
+        return self.phate_op_.graph.interpolate(self.phate_op_.embedding, pnm)
