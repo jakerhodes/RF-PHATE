@@ -37,14 +37,20 @@ Important API points:
   `"regression"`.
 - `model_type` selects the base ensemble: `"rf"` for random forests, `"et"` for
   extra trees, and `"gbt"` for gradient boosted trees.
-- `kernel_method` is passed to the `forestgeom` proximity weighting scheme.
-  The default is `"gap"`; use `"uniform"` for unweighted forest proximity.
-- `random_state`, `verbose`, and `n_jobs` are explicit RF-PHATE parameters and
-  are passed through to both the forest estimator and `PageRankPHATE` where
-  supported. scikit-learn gradient boosting estimators do not support `n_jobs`.
+- `random_state` and `n_jobs` are shared RF-PHATE parameters passed to both
+  the forest estimator and `PageRankPHATE` where supported.
 - `forest_params` are passed to the underlying scikit-learn ensemble.
+  Typical keys include `n_estimators`, `max_depth`, `max_features`,
+  and `verbose`.
 - `proximity_params` are passed to `forestgeom.ForestProximity`.
+  Typical keys include `weight_scheme` (`"gap"` by default), `matrix_type`,
+  and other options supported by forestgeom.
 - `phate_params` are passed to `PageRankPHATE`.
+  Typical keys include `n_components`, `t`, `n_landmark`, `verbose`,
+  `mds_solver`, and `beta`.
+- RF-PHATE always enforces `phate_params["knn_dist"] = "precomputed_affinity"`.
+- `force_symmetric` and `adjust_diagonal` are training-kernel options passed
+  to `fit` or `fit_transform`.
 - `transform(data)` embeds new observations using the fitted forest proximity
   model and PHATE graph interpolation.
 
@@ -63,22 +69,28 @@ data = rfphate.load_data("titanic")
 x, y = rfphate.dataprep(data)
 
 rfphate_op = rfphate.RFPHATE(
+    model_type="rf",
     random_state=42,
     n_jobs=-1,
-    verbose=1,
-    kernel_method="gap",
-    model_type="rf",
-    force_symmetric=True,
-    adjust_diagonal=True,
     forest_params={
         "n_estimators": 100,
+        "verbose": 1,
+    },
+    proximity_params={
+        "weight_scheme": "gap",
     },
     phate_params={
+        "verbose": 1,
         "mds_solver": "sgd",
     },
 )
 
-emb = rfphate_op.fit_transform(x, y)
+emb = rfphate_op.fit_transform(
+    x,
+    y,
+    force_symmetric=True,
+    adjust_diagonal=True,
+)
 
 plot_data = data.assign(
     **{
@@ -150,16 +162,20 @@ x_train, x_test, y_train, y_test = train_test_split(
 )
 
 rfphate_split_op = rfphate.RFPHATE(
+    model_type="rf",
     random_state=42,
     n_jobs=-1,
-    verbose=1,
-    kernel_method="gap",
-    model_type="rf",
+    proximity_params={
+        "weight_scheme": "gap",
+    },
+)
+
+emb_train = rfphate_split_op.fit_transform(
+    x_train,
+    y_train,
     force_symmetric=True,
     adjust_diagonal=True,
 )
-
-emb_train = rfphate_split_op.fit_transform(x_train, y_train)
 emb_test = rfphate_split_op.transform(x_test)
 ```
 
@@ -168,5 +184,5 @@ emb_test = rfphate_split_op.transform(x_test)
 If you find RF-PHATE useful, please cite:
 
 Rhodes, J.S., Aumon, A., Morin, S., et al. Gaining Biological Insights through
-Supervised Data Visualization. bioRxiv (2023).
-https://doi.org/10.1101/2023.11.22.568384.
+Supervised Data Visualization. Nature Computational Science (2026).
+https://doi.org/10.1038/s43588-026-00999-7.
