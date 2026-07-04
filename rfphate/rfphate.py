@@ -40,126 +40,101 @@ class RFPHATE:
         Prediction type used to choose the underlying forest estimator.
         Default is 'classification'.
 
-    n_components : int
-        The number of dimensions for the RF-PHATE embedding
-
-    kernel_method : str
-        The type of kernel to be constructed. Options are 'uniform', 'oob',
-        and 'gap' (default is 'gap', highly recommended)
-
     model_type : str
         Base forest model to use for generating proximities.
         Options include 'rf' for Random Forests, 'et' for ExtraTrees, and 'gbt'
         for Gradient Boosted Trees (default is 'rf')
 
-    n_landmark : int, optional
-        number of landmarks to use in fast PHATE (default is 2000)
-
-    t : int, optional
-        power to which the diffusion operator is powered.
-        This sets the level of diffusion. If 'auto', t is selected
-        according to the knee point in the Von Neumann Entropy of
-        the diffusion operator (default is 'auto')
-
-    random_state : integer
-        random seed state set for RF and MDS
+    random_state : int or None
+        Random seed passed to both the forest estimator and PageRankPHATE.
+        (default is None)
 
     n_jobs : int
-        Number of jobs to use where supported by the underlying forest and
-        PHATE operators. Random forests and ExtraTrees support this directly;
+        Number of jobs passed to PageRankPHATE and to forest estimators that
+        support it. Random forests and ExtraTrees support this directly;
         GradientBoosting estimators do not. (default is 1)
 
-    verbose : int or bool
-        If `True` or `> 0`, print status messages (default is 1)
-
-    adjust_diagonal : bool
-        Whether to force the diagonal of the kernel matrix to be nonzero.
-        (default is True)
-
-    force_symmetric : bool
-        Force symmetry of the kernel matrix. (default is False)
-
-    kernel_symm : str, optional
-        Selects which kernel symmetrization method is used for building the
-        underlying PHATE diffusion operator.
-        Note: Using force_symmetric is generally preferred over internal
-        kernel_symm for memory and runtime savings. (default is None)
-
-    beta : float
-        The damping factor for the PageRank algorithm. The range is (0, 1).
-        Values closer to 0 add more to the uniform teleporting probability.
-        If 1, teleporting is not used.
-
     self_similarity : bool
-        Only used if kernel_method == 'gap'. All points are passed down as if
-        OOB. Increases similarity between an observation and itself as well as
-        other points of the same class. NOTE: This partially disrupts the
-        geometry learned by the RF-GAP proximities, but can be useful for
-        exploring particularly noisy data. If True, ForestProximity.transform
-        is employed on the training data rather than training_proximity.
+        Only used if `proximity_params["weight_scheme"] == "gap"`. All points
+        are passed down as if OOB. Increases similarity between an observation
+        and itself as well as other points of the same class. NOTE: This
+        partially disrupts the geometry learned by the RF-GAP proximities, but
+        can be useful for exploring particularly noisy data. If True,
+        ForestProximity.transform is employed on the training data rather than
+        training_proximity.
 
     forest_params : dict or None
         Extra keyword arguments passed to the underlying scikit-learn ensemble
-        constructor. The random_state and verbose arguments are controlled by
-        RFPHATE and take precedence. The n_jobs argument is also controlled by
-        RFPHATE for estimators that support it.
+        constructor. Common keys include `n_estimators`, `max_depth`,
+        `max_features`, and `verbose`. The top-level `random_state` and
+        `n_jobs` arguments are passed through by RF-PHATE and take precedence.
+        The supported keys depend on `prediction_type` and `model_type` and
+        follow scikit-learn estimator APIs:
+        RandomForestClassifier/Regressor, ExtraTreesClassifier/Regressor, and
+        GradientBoostingClassifier/Regressor.
+
+        Reference:
+        https://scikit-learn.org/stable/modules/ensemble.html
 
     proximity_params : dict or None
-        Extra keyword arguments passed to ForestProximity. The forest and
-        weight_scheme arguments are controlled by RFPHATE and take precedence.
+        Extra keyword arguments passed to ForestProximity. Common keys include
+        `weight_scheme` (`'gap'` by default), `matrix_type`, and OOB/proximity
+        controls supported by forestgeom. The `forest` key is controlled by
+        RFPHATE and always overrides values supplied in this dictionary.
+
+        `force_symmetric` and `adjust_diagonal` are training-kernel options
+        passed to fit or fit_transform, not ForestProximity constructor
+        options.
+
+        Reference:
+        https://github.com/JakeSRhodesLab/forestgeom
 
     phate_params : dict or None
         Extra keyword arguments passed to PageRankPHATE. Parameters controlled
-        directly by RFPHATE, such as n_components, t, n_landmark, knn_dist,
-        n_jobs, random_state, verbose, beta, and kernel_symm, take precedence.
+        through this dictionary include PHATE and PageRankPHATE options such
+        as `n_components`, `t`, `n_landmark`, `verbose`, `kernel_symm`, `mds`,
+        `mds_solver`, `gamma`, and `beta`. The top-level `random_state` and
+        `n_jobs` arguments are passed through by RF-PHATE and take precedence.
+
+        RF-PHATE always enforces `knn_dist='precomputed_affinity'` and may
+        override `kernel_symm` during fitting when `force_symmetric=True` and
+        a non-symmetric training kernel is constructed.
+
+        References:
+        https://github.com/KrishnaswamyLab/PHATE
+        https://github.com/KrishnaswamyLab/graphtools
     """
 
     def __init__(
         self,
         prediction_type="classification",
         model_type="rf",
-        kernel_method="gap",
-        n_components=2,
-        t="auto",
-        n_landmark=2000,
-        beta=0.9,
-        n_jobs=1,
         random_state=None,
-        verbose=1,
+        n_jobs=1,
         self_similarity=False,
-        force_symmetric=False,
-        adjust_diagonal=True,
-        kernel_symm=None,
-
-        # Explicit extra kwargs routing for underlying objects
         forest_params=None,
         proximity_params=None,
         phate_params=None,
     ):
         # Forest-proximity parameters
         self.prediction_type = prediction_type
-        self.kernel_method = kernel_method
         self.model_type = model_type
-        self.adjust_diagonal = adjust_diagonal
-        self.force_symmetric = force_symmetric
-
-        # PHATE parameters
-        self.n_components = n_components
-        self.t = t
-        self.n_landmark = n_landmark
-        self.kernel_symm = kernel_symm
-        self.n_jobs = n_jobs
         self.random_state = random_state
-        self.verbose = verbose
-        self.beta = beta
+        self.n_jobs = n_jobs
 
         # RF-PHATE-specific parameter
         self.self_similarity = self_similarity
 
         # Explicit kwargs routing
         self.forest_params = dict(forest_params or {})
-        self.proximity_params = dict(proximity_params or {})
-        self.phate_params = dict(phate_params or {})
+        self.proximity_params = {
+            "weight_scheme": "gap",
+            **dict(proximity_params or {}),
+        }
+        self.phate_params = {
+            "kernel_symm": None,
+            **dict(phate_params or {}),
+        }
 
         # Learned objects
         self.proximity_model_ = None
@@ -186,7 +161,6 @@ class RFPHATE:
         forest_params = {
             **self.forest_params,
             "random_state": self.random_state,
-            "verbose": self.verbose,
         }
         if self.model_type in _FOREST_MODELS_WITH_N_JOBS:
             forest_params["n_jobs"] = self.n_jobs
@@ -205,7 +179,6 @@ class RFPHATE:
         proximity_params = {
             **self.proximity_params,
             "forest": self._make_forest(),
-            "weight_scheme": self.kernel_method,
         }
 
         return ForestProximity(**proximity_params)
@@ -214,14 +187,9 @@ class RFPHATE:
         """Instantiate the PageRankPHATE operator."""
         phate_params = {
             **self.phate_params,
-            "n_components": self.n_components,
-            "t": self.t,
-            "n_landmark": self.n_landmark,
             "knn_dist": "precomputed_affinity",
-            "n_jobs": self.n_jobs,
             "random_state": self.random_state,
-            "verbose": self.verbose,
-            "beta": self.beta,
+            "n_jobs": self.n_jobs,
             "kernel_symm": kernel_symm,
         }
 
@@ -241,16 +209,13 @@ class RFPHATE:
             shape=(n_train_points, n_landmarks),
         )
 
-    def _get_training_kernel(self, x):
-        """Build the kernel matrix used by PHATE.
-
-        This preserves the exact behavior of the previous implementation.
-        """
+    def _get_training_kernel(self, x, force_symmetric, adjust_diagonal):
+        """Build the forest-based kernel matrix used by PHATE."""
         if self.self_similarity:
             # Treat training points as out-of-sample (preserves self-sim behavior)
             kernel = self.proximity_model_.transform(x)
-            kernel_symm = self.kernel_symm
-            if self.force_symmetric and kernel_symm is None:
+            kernel_symm = self.phate_params.get("kernel_symm")
+            if force_symmetric and kernel_symm is None:
                 # If force_symmetric but kernel_symm is None, force
                 # symmetrization through PHATE because transform may not
                 # be symmetric
@@ -258,14 +223,14 @@ class RFPHATE:
         else:
             # Use the trained training-proximity matrix
             kernel = self.proximity_model_.training_proximity(
-                force_symmetric=self.force_symmetric,
-                adjust_diagonal=self.adjust_diagonal,
+                force_symmetric=force_symmetric,
+                adjust_diagonal=adjust_diagonal,
             )
-            kernel_symm = self.kernel_symm
+            kernel_symm = self.phate_params.get("kernel_symm")
 
         return kernel, kernel_symm
 
-    def _fit_phate(self, x, y):
+    def _fit_phate(self, x, y, force_symmetric, adjust_diagonal):
         # ---------------------------------------------------------
         # STEP 1: fit forest proximity model
         # ---------------------------------------------------------
@@ -275,7 +240,11 @@ class RFPHATE:
         # ---------------------------------------------------------
         # STEP 2: build training kernel for PHATE
         # ---------------------------------------------------------
-        kernel, kernel_symm = self._get_training_kernel(x)
+        kernel, kernel_symm = self._get_training_kernel(
+            x,
+            force_symmetric=force_symmetric,
+            adjust_diagonal=adjust_diagonal,
+        )
 
         # ---------------------------------------------------------
         # STEP 3: fit PHATE on the kernel
@@ -284,7 +253,7 @@ class RFPHATE:
         self.phate_op_.fit(kernel)
         return self
 
-    def fit(self, x, y):
+    def fit(self, x, y, force_symmetric=False, adjust_diagonal=True):
         """Fit the forest proximity model and the PHATE operator.
 
         Parameters
@@ -297,16 +266,28 @@ class RFPHATE:
             The target values (class labels in classification, real numbers
             in regression).
 
+        force_symmetric : bool
+            Force symmetry of the training proximity kernel. (default is False)
+
+        adjust_diagonal : bool
+            Whether to force the diagonal of the training proximity kernel to
+            be nonzero. (default is True)
+
         Returns
         -------
         self : RFPHATE
             Fitted estimator.
         """
-        self._fit_phate(x, y)
+        self._fit_phate(
+            x,
+            y,
+            force_symmetric=force_symmetric,
+            adjust_diagonal=adjust_diagonal,
+        )
 
         return self
 
-    def fit_transform(self, x, y):
+    def fit_transform(self, x, y, force_symmetric=False, adjust_diagonal=True):
         """Fit RF-PHATE and return the embedding.
 
         Parameters
@@ -318,13 +299,25 @@ class RFPHATE:
             The target values (class labels in classification, real numbers
             in regression).
 
+        force_symmetric : bool
+            Force symmetry of the training proximity kernel. (default is False)
+
+        adjust_diagonal : bool
+            Whether to force the diagonal of the training proximity kernel to
+            be nonzero. (default is True)
+
         Returns
         -------
         array-like of shape (n_samples, n_components)
             A lower-dimensional representation of the data following the
             RF-PHATE algorithm.
         """
-        self.fit(x, y)
+        self.fit(
+            x,
+            y,
+            force_symmetric=force_symmetric,
+            adjust_diagonal=adjust_diagonal,
+        )
         return self.transform()
 
     def extend_to_data(self, X):
