@@ -1,4 +1,4 @@
-from forestgeom import ForestProximity
+from forestgeom import Proximity
 from .pagerank_phate import PageRankPHATE
 
 import numpy as np
@@ -7,27 +7,7 @@ import graphtools
 
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import normalize
-from sklearn.ensemble import (
-    RandomForestClassifier,
-    RandomForestRegressor,
-    ExtraTreesClassifier,
-    ExtraTreesRegressor,
-    GradientBoostingClassifier,
-    GradientBoostingRegressor,
-)
-
-
-_FOREST_ESTIMATORS = {
-    ("classification", "rf"): RandomForestClassifier,
-    ("regression", "rf"): RandomForestRegressor,
-    ("classification", "et"): ExtraTreesClassifier,
-    ("regression", "et"): ExtraTreesRegressor,
-    ("classification", "gbt"): GradientBoostingClassifier,
-    ("regression", "gbt"): GradientBoostingRegressor,
-}
-
-
-_FOREST_MODELS_WITH_N_JOBS = {"rf", "et"}
+from sklearn.ensemble import RandomForestClassifier
 
 
 class RFPHATE:
@@ -36,23 +16,19 @@ class RFPHATE:
 
     Parameters
     ----------
-    prediction_type : {'classification', 'regression'}
-        Prediction type used to choose the underlying forest estimator.
-        Default is 'classification'.
-
-    model_type : str
-        Base forest model to use for generating proximities.
-        Options include 'rf' for Random Forests, 'et' for ExtraTrees, and 'gbt'
-        for Gradient Boosted Trees (default is 'rf')
+    forest : estimator instance or None
+        Tree ensemble accepted by forestgeom.Proximity, such as a configured
+        scikit-learn classifier, regressor, or compatible ensemble adapter.
+        If None, use RandomForestClassifier() with scikit-learn defaults.
+        Configure forest parameters on the supplied estimator. Forestgeom
+        clones and fits unfitted estimators and reuses fitted estimators.
 
     random_state : int or None
-        Random seed passed to both the forest estimator and PageRankPHATE.
-        (default is None)
+        Random seed passed to PageRankPHATE. (default is None)
 
     n_jobs : int
-        Number of jobs passed to PageRankPHATE and to forest estimators that
-        support it. Random forests and ExtraTrees support this directly;
-        GradientBoosting estimators do not. (default is 1)
+        Number of jobs passed to PageRankPHATE. (default is 1)
+        Configure forest parallelism on the supplied estimator.
 
     self_similarity : bool
         Only used if `proximity_params["weight_scheme"] == "gap"`. All points
@@ -60,30 +36,18 @@ class RFPHATE:
         and itself as well as other points of the same class. NOTE: This
         partially disrupts the geometry learned by the RF-GAP proximities, but
         can be useful for exploring particularly noisy data. If True,
-        ForestProximity.transform is employed on the training data rather than
+        Proximity.transform is employed on the training data rather than
         training_proximity.
 
-    forest_params : dict or None
-        Extra keyword arguments passed to the underlying scikit-learn ensemble
-        constructor. Common keys include `n_estimators`, `max_depth`,
-        `max_features`, and `verbose`. The top-level `random_state` and
-        `n_jobs` arguments are passed through by RF-PHATE and take precedence.
-        The supported keys depend on `prediction_type` and `model_type` and
-        follow scikit-learn estimator APIs:
-        RandomForestClassifier/Regressor, ExtraTreesClassifier/Regressor, and
-        GradientBoostingClassifier/Regressor.
-
-        Reference:
-        https://scikit-learn.org/stable/modules/ensemble.html
-
     proximity_params : dict or None
-        Extra keyword arguments passed to ForestProximity. Common keys include
-        `weight_scheme` (`'gap'` by default), `matrix_type`, and OOB/proximity
-        controls supported by forestgeom. The `forest` key is controlled by
-        RFPHATE and always overrides values supplied in this dictionary.
+        Extra keyword arguments passed to forestgeom.Proximity. The supported
+        option is `weight_scheme`: 'uniform', 'oob', 'gap' (the RF-PHATE
+        default), 'kerf', or 'boosted'. Proximity matrices are sparse by
+        default; forestgeom 0.4 no longer accepts `matrix_type`. The `forest`
+        key is controlled by RFPHATE and overrides this dictionary.
 
         `force_symmetric` and `adjust_diagonal` are training-kernel options
-        passed to fit or fit_transform, not ForestProximity constructor
+        passed to fit or fit_transform, not Proximity constructor
         options.
 
         Reference:
@@ -107,18 +71,15 @@ class RFPHATE:
 
     def __init__(
         self,
-        prediction_type="classification",
-        model_type="rf",
+        forest=None,
         random_state=None,
         n_jobs=1,
         self_similarity=False,
-        forest_params=None,
         proximity_params=None,
         phate_params=None,
     ):
         # Forest-proximity parameters
-        self.prediction_type = prediction_type
-        self.model_type = model_type
+        self.forest = forest
         self.random_state = random_state
         self.n_jobs = n_jobs
 
@@ -126,7 +87,6 @@ class RFPHATE:
         self.self_similarity = self_similarity
 
         # Explicit kwargs routing
-        self.forest_params = dict(forest_params or {})
         self.proximity_params = {
             "weight_scheme": "gap",
             **dict(proximity_params or {}),
@@ -147,41 +107,15 @@ class RFPHATE:
                 "Call 'fit' or 'fit_transform' first."
             )
 
-    def _make_forest(self):
-        """Instantiate the configured scikit-learn forest estimator."""
-        key = (self.prediction_type, self.model_type)
-        if key not in _FOREST_ESTIMATORS:
-            raise ValueError(
-                "Invalid combination of prediction_type and model_type. "
-                "Use prediction_type in {'classification', 'regression'} and "
-                "model_type in {'rf', 'et', 'gbt'}."
-            )
-
-        Estimator = _FOREST_ESTIMATORS[key]
-        forest_params = {
-            **self.forest_params,
-            "random_state": self.random_state,
-        }
-        if self.model_type in _FOREST_MODELS_WITH_N_JOBS:
-            forest_params["n_jobs"] = self.n_jobs
-        else:
-            forest_params.pop("n_jobs", None)
-
-        return Estimator(**forest_params)
-
     def _make_proximity_model(self):
-        """Instantiate the underlying ForestProximity model around a forest.
-
-        This builds a base ensemble estimator according to `model_type` and
-        `prediction_type`, then wraps it with `ForestProximity` using the
-        selected proximity weight scheme.
-        """
+        """Wrap the supplied ensemble, or a default classifier, in Proximity."""
+        forest = self.forest if self.forest is not None else RandomForestClassifier()
         proximity_params = {
             **self.proximity_params,
-            "forest": self._make_forest(),
+            "forest": forest,
         }
 
-        return ForestProximity(**proximity_params)
+        return Proximity(**proximity_params)
 
     def _make_phate_operator(self, kernel_symm):
         """Instantiate the PageRankPHATE operator."""
