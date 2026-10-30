@@ -165,6 +165,12 @@ class RFPHATE:
         return kernel, kernel_symm
 
     def _fit_phate(self, x, y, force_symmetric, adjust_diagonal):
+        # Forestgeom 0.4 expects dense feature arrays, even for sklearn forests
+        # that accept sparse inputs. Keep the resulting proximity matrices sparse.
+        x = x.toarray() if sparse.issparse(x) else x
+        # A failed refit must not expose an old graph with a new proximity model.
+        self.proximity_model_ = None
+        self.phate_op_ = None
         # ---------------------------------------------------------
         # STEP 1: fit forest proximity model
         # ---------------------------------------------------------
@@ -183,8 +189,9 @@ class RFPHATE:
         # ---------------------------------------------------------
         # STEP 3: fit PHATE on the kernel
         # ---------------------------------------------------------
-        self.phate_op_ = self._make_phate_operator(kernel_symm)
-        self.phate_op_.fit(kernel)
+        phate_op = self._make_phate_operator(kernel_symm)
+        phate_op.fit(kernel)
+        self.phate_op_ = phate_op
         return self
 
     def fit(self, x, y, force_symmetric=False, adjust_diagonal=True):
@@ -279,6 +286,7 @@ class RFPHATE:
         """
         self._check_is_fitted()
 
+        X = X.toarray() if sparse.issparse(X) else X
         kernel = self.proximity_model_.transform(X)
 
         if isinstance(self.phate_op_.graph, graphtools.graphs.LandmarkGraph):

@@ -14,15 +14,71 @@ the paper is available at
 
 ## Installation
 
-Install RF-PHATE from GitHub with `pip`:
+RF-PHATE supports Python 3.10–3.14. Install
+[`uv`](https://docs.astral.sh/uv/getting-started/installation/) 0.11.16 or newer,
+then create a development environment from the committed lockfile:
 
 ```bash
-pip install git+https://github.com/jakerhodes/RF-PHATE
+git clone https://github.com/jakerhodes/RF-PHATE.git
+cd RF-PHATE
+uv sync --locked
+uv run --locked pytest -q
 ```
 
-Core dependencies include `forestgeom>=0.4.0`, `graphtools`, `phate`,
-`scikit-learn`, `numpy`, `scipy`, and `pandas`. Demo plotting additionally uses
-`seaborn`, `plotly`, and `nbformat`.
+uv uses Python 3.12 by default, as selected in `.python-version`, and creates
+an editable installation in `.venv`. The `dev` dependency group supplies pytest
+and coverage tools. To install only runtime dependencies, use
+`uv sync --locked --no-dev`.
+
+For the examples and notebook, enable the demo extra and select `.venv` as the
+Python environment in your notebook editor:
+
+```bash
+uv sync --locked --extra demo
+uv run --locked --extra demo python -m ipykernel install --user --name rfphate
+```
+
+The demo extra includes Matplotlib, seaborn, Plotly, nbformat, and ipykernel.
+Core dependencies include `forestgeom>=0.4.0,<0.5`, `graphtools`, `phate`,
+`scikit-learn`, `numpy`, `scipy`, `pandas`, and `joblib`.
+
+To install RF-PHATE into another uv project, use
+`uv add "rfphate @ git+https://github.com/jakerhodes/RF-PHATE.git"`.
+Standard pip installation from the same Git URL is also supported; consumers
+resolve the package's dependency ranges rather than using this repository's
+development lockfile.
+
+## Development and Validation
+
+`pyproject.toml` declares dependencies and `uv.lock` records their resolved
+versions. Commit both when dependencies change. Add dependencies with `uv add`,
+development tools with `uv add --dev`, and demo packages with
+`uv add --optional demo`. CI uses uv 0.11.16 and checks the lockfile before testing.
+
+```bash
+uv lock --check
+uv sync --locked
+uv run --locked pytest -q --cov=rfphate --cov-report=term-missing
+uv build --no-sources
+```
+
+To deliberately update forestgeom within the supported 0.4 series, run
+`uv lock --upgrade-package forestgeom`, run the complete test suite, and commit
+the reviewed lockfile change. A move to 0.5 or later requires updating the
+declared range and reviewing the integration tests. Avoid local forestgeom
+paths or floating Git branches in committed configuration.
+
+For tools requiring a requirements file, generate one from the lockfile:
+
+```bash
+uv export --locked --no-dev --no-emit-project --format requirements-txt --output-file requirements.txt
+```
+
+The exported file describes runtime dependencies; install RF-PHATE separately
+from its wheel or source. It is generated output and is not maintained by hand.
+CI also builds a wheel from the source distribution, installs it in a fresh
+runtime-only environment, and checks datasets and the original integration suite
+from outside the checkout.
 
 ## Forestgeom Refactor
 
@@ -49,8 +105,13 @@ Important API points:
 - RF-PHATE always enforces `phate_params["knn_dist"] = "precomputed_affinity"`.
 - `force_symmetric` and `adjust_diagonal` are training-kernel options passed
   to `fit` or `fit_transform`.
+- GAP is directional by default. With `force_symmetric=False`, graphtools may
+  emit `K should be symmetric`; use `force_symmetric=True` when a symmetric
+  training kernel is desired.
 - `transform(data)` embeds new observations using the fitted forest proximity
   model and PHATE graph interpolation.
+- Sparse feature inputs are converted to dense arrays at the forestgeom 0.4
+  boundary. The forest proximity and extension matrices remain sparse.
 
 ## Quick Demo
 

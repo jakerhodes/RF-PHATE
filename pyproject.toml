@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rfphate"
+version = "0.1.2"
+description = "Supervised manifold embeddings based on random forest proximities"
+readme = "README.md"
+requires-python = ">=3.10,<3.15"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Jake Rhodes", email = "jakerhodes8@gmail.com" },
+    { name = "Adrien Aumon", email = "adrien.aumon@umontreal.ca" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "forestgeom>=0.4.0,<0.5",
+    "graphtools",
+    "joblib",
+    "numpy",
+    "pandas",
+    "phate",
+    "scikit-learn",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "https://github.com/jakerhodes/RF-PHATE"
+Repository = "https://github.com/jakerhodes/RF-PHATE"
+Issues = "https://github.com/jakerhodes/RF-PHATE/issues"
+
+[project.optional-dependencies]
+demo = ["matplotlib", "seaborn", "plotly", "nbformat", "ipykernel"]
+
+[dependency-groups]
+dev = ["pytest", "pytest-cov"]
+
+[tool.uv]
+required-version = ">=0.11.16"
+
+[tool.setuptools.packages.find]
+include = ["rfphate", "rfphate.*"]
+
+[tool.setuptools.package-data]
+rfphate = ["datasets/*.csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["rfphate"]
+
+[tool.coverage.report]
+show_missing = true

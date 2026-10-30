@@ -80,7 +80,7 @@ def local_structure_preservation(x, y, embedding, model = None, emb_model = None
     
 
     if prediction_type is None and y is not None:
-        if np.dtype(y) == 'float64' or np.dtype(y) == 'float32':
+        if np.asarray(y).dtype.kind == 'f':
             prediction_type = 'regression'
         else:
             prediction_type = 'classification'
@@ -159,4 +159,4 @@ def local_structure_preservation(x, y, embedding, model = None, emb_model = None
             return {'correls':  (correls.mean(), correls.std()), 'model_score': score, 'emb_model_score': emb_score}
 
         else:
-            return (correls.mean(), correls.std()) 
+            return (correls.mean(), correls.std())

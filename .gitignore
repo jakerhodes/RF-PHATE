@@ -195,3 +195,6 @@ Temporary Items
 .apdisk
 
 _docs/
+
+# Generated compatibility export; pyproject.toml and uv.lock are authoritative.
+/requirements.txt

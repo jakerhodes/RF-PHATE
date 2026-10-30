@@ -1,0 +1,63 @@
+name: Tests and packaging
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MPLBACKEND: Agg
+
+jobs:
+  tests:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: windows-latest
+            python: "3.12"
+          - os: macos-latest
+            python: "3.12"
+    env:
+      UV_PYTHON: ${{ matrix.python }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - run: uv lock --check
+      - run: uv sync --locked
+      - run: uv run --locked pytest -q --cov=rfphate --cov-report=term-missing
+
+  wheel:
+    name: Installed wheel / Python 3.12
+    runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: "3.12"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - run: uv lock --check
+      - run: uv build --no-sources
+      - name: Install wheel and locked runtime dependencies
+        run: |
+          uv export --locked --no-dev --no-emit-project --format requirements-txt --output-file "$RUNNER_TEMP/requirements.txt"
+          uv venv "$RUNNER_TEMP/rfphate-wheel" --python 3.12
+          uv pip sync --python "$RUNNER_TEMP/rfphate-wheel/bin/python" "$RUNNER_TEMP/requirements.txt"
+          uv pip install --python "$RUNNER_TEMP/rfphate-wheel/bin/python" --no-deps dist/*.whl
+          uv pip check --python "$RUNNER_TEMP/rfphate-wheel/bin/python"
+      - name: Check installation outside the checkout
+        working-directory: ${{ runner.temp }}
+        run: '"$RUNNER_TEMP/rfphate-wheel/bin/python" -I "$GITHUB_WORKSPACE/scripts/check_wheel.py"'

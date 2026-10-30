@@ -63,7 +63,7 @@ def global_structure_preservation(x, y, embedding, model = None,
     
 
     if prediction_type is None and y is not None:
-        if np.dtype(y) == 'float64' or np.dtype(y) == 'float32':
+        if np.asarray(y).dtype.kind == 'f':
             prediction_type = 'regression'
         else:
             prediction_type = 'classification'
@@ -81,7 +81,7 @@ def global_structure_preservation(x, y, embedding, model = None,
     importance = permutation_importance(model, x, y, n_repeats = n_repeats, n_jobs = n_jobs,
             random_state = random_state, **kwargs)
     
-    univar_correls = univariate_correlations(x, embedding, type)
+    univar_correls = univariate_correlations(x, embedding, type).ravel()
 
     correls = np.zeros((n_repeats,))
 
