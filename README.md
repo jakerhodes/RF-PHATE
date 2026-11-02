@@ -80,6 +80,40 @@ CI also builds a wheel from the source distribution, installs it in a fresh
 runtime-only environment, and checks datasets and the original integration suite
 from outside the checkout.
 
+## Datasets
+
+`rfphate.load_data()` returns the Iris data. The other bundled CSV
+names are `"titanic"`, `"auto-mpg"`, and `"artificial_tree"`. Each result is a
+pandas DataFrame with the target in its first column, ready for
+`rfphate.dataprep(data)`.
+
+OpenML datasets use the same interface. The named examples `"credit-g"` and
+`"wine-quality-red"` refer to fixed OpenML dataset IDs and the `class` target.
+Any positive OpenML dataset ID can also be supplied directly. For an ID,
+`target` selects a column; without it, the dataset's OpenML default target is
+used. Each call returns a single target followed by the feature columns.
+
+```python
+import rfphate
+
+data = rfphate.load_data("credit-g")
+same_dataset = rfphate.load_data(31, target="class")
+x, y = rfphate.dataprep(data)
+
+# An OpenML ID outside the named examples also works:
+other_data = rfphate.load_data(40691)
+```
+
+The first OpenML load needs internet access; scikit-learn caches downloads
+under its default data directory (`~/scikit_learn_data`) for later use. The
+dataset files are not included in the RF-PHATE wheel. When an OpenML dataset
+has no default target or has multiple targets, pass one target column by name.
+The loader preserves the dataset's original values and dtypes; handle missing
+values and other preprocessing according to your analysis.
+
+OpenML sources: [`credit-g`, ID 31](https://www.openml.org/search?id=31&type=data)
+and [`wine-quality-red`, ID 40691](https://www.openml.org/search?id=40691&type=data).
+
 ## Forestgeom Refactor
 
 RF-PHATE now delegates random forest proximity construction to
